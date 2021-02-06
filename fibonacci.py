@@ -1,12 +1,13 @@
 # Fibonacci sequence: https://www.mathsisfun.com/numbers/fibonacci-sequence.html
 
+
 def fib(n):
     if n == 0:
         return 0
     if n == 1:
         return 1
     if n > 1:
-        return fib(n-1) + fib(n-2)
+        return fib(n - 1) + fib(n - 2)
 
 
 def fib_iterative(n):
@@ -16,7 +17,7 @@ def fib_iterative(n):
         num = 1
     else:
         n_1, n_2 = 1, 0
-        for i in range(2, n+1):
+        for i in range(2, n + 1):
             num = n_1 + n_2
             n_1, n_2 = num, n_1
     return num
