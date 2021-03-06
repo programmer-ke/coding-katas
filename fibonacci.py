@@ -40,14 +40,15 @@ def fib_iterative2(n):
 
 if __name__ == "__main__":
 
-    print("fib recursive")
-    for i in range(11):
-        print(fib(i))
+    # recursive
+    expected = [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55]
+    recursive = [fib(i) for i in range(11)]
+    assert expected == recursive
 
-    print("fib iterative")
-    for i in range(11):
-        print(fib_iterative(i))
+    # iterative
+    iterative = [fib_iterative(i) for i in range(11)]
+    assert expected == iterative
 
-    print("fib iterative 2")
-    for i in range(11):
-        print(fib_iterative2(i))
+    # iterative 2
+    iterative_2 = [fib_iterative2(i) for i in range(11)]
+    assert expected == iterative_2
