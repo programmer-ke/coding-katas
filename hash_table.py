@@ -15,7 +15,7 @@ class HashTable:
 
     def __init__(self):
         self._size = 0
-        self._capacity = 10
+        self._capacity = 5
         self._buckets = [None] * self._capacity
 
     def set(self, key, value):
