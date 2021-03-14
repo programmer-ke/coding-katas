@@ -10,13 +10,13 @@ class HashTable:
             self.next = None
 
         def __repr__(self):
-            str_ = "key: {k}, value: {v}, next: {n}"
+            str_ = "(key: {k}, value: {v}, next: {n})"
             return str_.format(k=self.key, v=self.value, n=self.next)
 
     def __init__(self):
         self._size = 0
-        self._capacity = 5
-        self._buckets = [None] * 5
+        self._capacity = 10
+        self._buckets = [None] * self._capacity
 
     def set(self, key, value):
         bucket_index = self._hash(key)
@@ -43,19 +43,51 @@ class HashTable:
 
     def _bucket_retrieve(self, index, key):
         node = self._buckets[index]
-        return node.value
+        if node is None:
+            raise KeyError
+
+        value = self._traverse_list_for_item(node, key)
+        return value
+
+    def _traverse_list_for_item(self, head, key):
+
+        current_node = head
+        while current_node is not None:
+            if current_node.key == key:
+                return current_node.value
+            current_node = current_node.next
+        else:
+            raise KeyError
 
     def _bucket_insert(self, index, key, value):
         # If key exists, update value,
         # otherwise, create key,value pair
-        node = self._buckets[index]
-        if node is None:
+        head = self._buckets[index]
+        if head is None:
             new_node = self.Node(key, value)
             self._buckets[index] = new_node
+        else:
+            self._add_or_update(head, key, value)
         return
+
+    def _add_or_update(self, head, key, value):
+        # Traverse linked list, to find key
+        # If it doesn't exist, add it at the end
+
+        current_node = head
+
+        while current_node is not None:
+            if current_node.key == key:
+                current_node.value = value
+                break
+            previous_node = current_node
+            current_node = current_node.next
+        else:
+            previous_node.next = self.Node(key, value)
 
     def debug(self):
         print(self._buckets)
+
 
 if __name__ == "__main__":
 
@@ -72,6 +104,9 @@ if __name__ == "__main__":
         ht.set(k, i+1)
 
     for i, k in enumerate(keys):
-        assert ht.get(k) == i+1  # todo: implement collision handling
+        assert ht.get(k) == i+1
 
-    ht.debug()
+    # test re-assignment
+    ht.set("some_key", 1)
+    ht.set("some_key", 2)
+    assert ht.get("some_key") == 2
