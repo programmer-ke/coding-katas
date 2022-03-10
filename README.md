@@ -6,6 +6,7 @@ The goal here is that each file demostrates a single concept in code.
 
 - Different approaches to fibonacci [code](py/fibonacci.py)
 - Hash table with separate chaining [code](py/hash_table.py)
+- Initialize and reverse a linked list [code](py/reverse_linkedlist.py)
 
 ## Others
 
