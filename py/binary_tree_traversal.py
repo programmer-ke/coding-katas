@@ -1,3 +1,4 @@
+from queue import Queue
 # Tree shape
 # ----------
 #     a
@@ -5,8 +6,10 @@
 #   b   c
 #  / \   \
 # d   e   f
+#
+# Implement breadth-first-search and depth-first-search variations
 
-traversal = []
+traversal = []  # node values added here in order of traversal
 
 
 class Node:
@@ -63,15 +66,38 @@ class Node:
                 stack.append(node.left)
             visited.add(node)
 
+    def dfs_postorder_iterative(self):
+        stack = []
+        visited = set()
+        stack.append(self)
+        while stack:
+            node = stack.pop()
+            if node in visited:
+                traversal.append(node.value)
+                continue
+            stack.append(node)
+            visited.add(node)
+            if node.right:
+                stack.append(node.right)
+            if node.left:
+                stack.append(node.left)
+
+    def bfs(self):
+        queue = Queue()
+        queue.put(self)
+        while not queue.empty():
+            node = queue.get()
+            traversal.append(node.value)
+            if node.left:
+                queue.put(node.left)
+            if node.right:
+                queue.put(node.right)
+
 
 root = Node('a', Node('b', Node('d'), Node('e')), Node('c', None, Node('f')))
 
 if __name__ == "__main__":
-    # test:
-    # - dfs
-    #   - preorder, inorder, postorder
-    #     - recursive, iterative
-    # - bfs
+
     root.dfs_preorder_recursive()
     assert traversal == ['a', 'b', 'd', 'e', 'c', 'f']
     traversal.clear()
@@ -91,6 +117,11 @@ if __name__ == "__main__":
     root.dfs_inorder_iterative()
     assert traversal == ['d', 'b', 'e', 'a', 'c', 'f']
     traversal.clear()
-    # todo:
-    # - dfs_postorder_iterative
-    # - bfs
+
+    root.dfs_postorder_iterative()
+    assert traversal == ['d', 'e', 'b', 'f', 'c', 'a']
+    traversal.clear()
+
+    root.bfs()
+    assert traversal == ['a', 'b', 'c', 'd', 'e', 'f']
+    traversal.clear()
