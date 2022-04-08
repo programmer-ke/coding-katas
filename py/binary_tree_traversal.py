@@ -112,6 +112,19 @@ class Node:
             collection.append(node.value)
         traversal.append(collection)
 
+    def maximum_depth(self):
+        # bfs traversal
+        # track level
+        queue = Queue()
+        queue.put((self, 1))
+        while not queue.empty():
+            node, node_level = queue.get()
+            if node.left:
+                queue.put((node.left, node_level + 1))
+            if node.right:
+                queue.put((node.right, node_level + 1))
+        return node_level
+
 
 root = Node('a', Node('b', Node('d'), Node('e')), Node('c', None, Node('f')))
 
@@ -148,3 +161,5 @@ if __name__ == "__main__":
     root.bfs_with_levels()
     assert traversal == [['a'], ['b', 'c'], ['d', 'e', 'f']]
     traversal.clear()
+
+    assert root.maximum_depth() == 3
