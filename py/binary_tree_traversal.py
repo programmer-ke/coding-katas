@@ -93,6 +93,25 @@ class Node:
             if node.right:
                 queue.put(node.right)
 
+    def bfs_with_levels(self):
+        queue = Queue()
+        queue.put((self, 0))
+        level = 0
+        collection = []
+        while not queue.empty():
+            node, node_level = queue.get()
+            if node.left:
+                queue.put((node.left, node_level + 1))
+            if node.right:
+                queue.put((node.right, node_level + 1))
+
+            if level != node_level:
+                traversal.append(collection)
+                collection = []
+                level = node_level
+            collection.append(node.value)
+        traversal.append(collection)
+
 
 root = Node('a', Node('b', Node('d'), Node('e')), Node('c', None, Node('f')))
 
@@ -124,4 +143,8 @@ if __name__ == "__main__":
 
     root.bfs()
     assert traversal == ['a', 'b', 'c', 'd', 'e', 'f']
+    traversal.clear()
+
+    root.bfs_with_levels()
+    assert traversal == [['a'], ['b', 'c'], ['d', 'e', 'f']]
     traversal.clear()
