@@ -113,8 +113,6 @@ class Node:
         traversal.append(collection)
 
     def maximum_depth(self):
-        # bfs traversal
-        # track level
         queue = Queue()
         queue.put((self, 1))
         while not queue.empty():
@@ -124,6 +122,29 @@ class Node:
             if node.right:
                 queue.put((node.right, node_level + 1))
         return node_level
+
+    def is_symmetrical_recursive(self):
+        left_subtree = []
+        right_subtree = []
+
+        self._left_traversal_helper(left_subtree)
+        self._right_traversal_helper(right_subtree)
+
+        return left_subtree == right_subtree
+
+    def _left_traversal_helper(self, collection):
+        if self.left:
+            self.left._left_traversal_helper(collection)
+        collection.append(self.value)
+        if self.right:
+            self.right._left_traversal_helper(collection)
+
+    def _right_traversal_helper(self, collection):
+        if self.right:
+            self.right._right_traversal_helper(collection)
+        collection.append(self.value)
+        if self.left:
+            self.left._right_traversal_helper(collection)
 
 
 root = Node('a', Node('b', Node('d'), Node('e')), Node('c', None, Node('f')))
@@ -163,3 +184,29 @@ if __name__ == "__main__":
     traversal.clear()
 
     assert root.maximum_depth() == 3
+
+    # check that tree is symmetrical
+    #      1
+    #    /  \
+    #   2    2
+    #  / \  / \
+    # 3   4 4  3
+
+    symmetrical_tree = Node('1',
+                            Node('2', Node('3'), Node('4')),
+                            Node('2', Node('4'), Node('3')))
+
+    assert symmetrical_tree.is_symmetrical_recursive()
+
+    # check that tree is not symmetrical
+    #      1
+    #    /  \
+    #   2    2
+    #    \    \
+    #     3    3
+
+    non_symmetrical_tree = Node('1',
+                                Node('2', None, Node('3')),
+                                Node('2', None, Node('3')))
+
+    assert not non_symmetrical_tree.is_symmetrical_recursive()
