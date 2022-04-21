@@ -1,12 +1,5 @@
 from queue import Queue
-# Tree shape
-# ----------
-#     a
-#    / \
-#   b   c
-#  / \   \
-# d   e   f
-#
+
 # Implement breadth-first-search and depth-first-search variations
 
 traversal = []  # node values added here in order of traversal
@@ -147,9 +140,21 @@ class Node:
             self.left._right_traversal_helper(collection)
 
 
-root = Node('a', Node('b', Node('d'), Node('e')), Node('c', None, Node('f')))
-
 if __name__ == "__main__":
+
+    # Tree shape
+    # ----------
+    #     a
+    #    / \
+    #   b   c
+    #  / \   \
+    # d   e   f
+    #
+    root = Node('a',
+                Node('b',
+                     Node('d'), Node('e')),
+                Node('c',
+                     None, Node('f')))
 
     root.dfs_preorder_recursive()
     assert traversal == ['a', 'b', 'd', 'e', 'c', 'f']
