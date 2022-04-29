@@ -125,6 +125,63 @@ class Node:
 
         return left_subtree == right_subtree
 
+    def is_symmetrical_iterative(self):
+
+        # Check that all the nodes at the same depth
+        # in the tree form a palindrome.
+
+        queue = Queue()
+        level = 0
+        queue.put((self, level))
+        collection = []
+        while not queue.empty():
+            node, node_level = queue.get()
+            if node is None:
+                node_value = None
+            else:
+                node_value = node.value
+
+            if node_level == level:
+                collection.append(node_value)
+            else:
+                if not self._is_palindrome(collection):
+                    return False
+                collection = []
+                collection.append(node_value)
+                level = node_level
+
+            if node is None:
+                continue
+
+            left_child = None
+            right_child = None
+            if node.left:
+                left_child = node.left
+            if node.right:
+                right_child = node.right
+            queue.put((left_child, level + 1))
+            queue.put((right_child, level + 1))
+
+        # close out the last collection
+        if not self._is_palindrome(collection):
+            return False
+        return True
+
+    @staticmethod
+    def _is_palindrome(list_):
+        length = len(list_)
+        if length % 2:
+            # odd
+            comparisons = (length - 1) // 2
+        else:
+            # even
+            comparisons = length // 2
+
+        for i in range(comparisons):
+            if list_[0 + i] != list_[length - 1 - i]:
+                return False
+        return True
+
     def _left_traversal_helper(self, collection):
         if self.left:
             self.left._left_traversal_helper(collection)
@@ -202,6 +259,7 @@ if __name__ == "__main__":
                             Node('2', Node('4'), Node('3')))
 
     assert symmetrical_tree.is_symmetrical_recursive()
+    assert symmetrical_tree.is_symmetrical_iterative()
 
     # check that tree is not symmetrical
     #      1
@@ -215,3 +273,4 @@ if __name__ == "__main__":
                                 Node('2', None, Node('3')))
 
     assert not non_symmetrical_tree.is_symmetrical_recursive()
+    assert not non_symmetrical_tree.is_symmetrical_iterative()
