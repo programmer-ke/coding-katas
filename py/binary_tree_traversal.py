@@ -125,6 +125,20 @@ class Node:
 
         return left_subtree == right_subtree
 
+    def _left_traversal_helper(self, collection):
+        if self.left:
+            self.left._left_traversal_helper(collection)
+        collection.append(self.value)
+        if self.right:
+            self.right._left_traversal_helper(collection)
+
+    def _right_traversal_helper(self, collection):
+        if self.right:
+            self.right._right_traversal_helper(collection)
+        collection.append(self.value)
+        if self.left:
+            self.left._right_traversal_helper(collection)
+
     def is_symmetrical_iterative(self):
 
         # Check that all the nodes at the same depth
@@ -182,20 +196,48 @@ class Node:
                 return False
         return True
 
-    def _left_traversal_helper(self, collection):
-        if self.left:
-            self.left._left_traversal_helper(collection)
-        collection.append(self.value)
-        if self.right:
-            self.right._left_traversal_helper(collection)
+    def is_symmetrical_recursive_solution(self):
+        # https://www.baeldung.com/cs/binary-tree-is-symmetric
 
-    def _right_traversal_helper(self, collection):
-        if self.right:
-            self.right._right_traversal_helper(collection)
-        collection.append(self.value)
-        if self.left:
-            self.left._right_traversal_helper(collection)
+        return self._is_mirror(self.left, self.right)
 
+    def _is_mirror(self, left_subtree, right_subtree):
+        if left_subtree is None and right_subtree is None:
+            return True
+        if left_subtree is None or right_subtree is None:
+            return False
+        if left_subtree.value != right_subtree.value:
+            return False
+        return (
+            self._is_mirror(left_subtree.left, right_subtree.right) and
+            self._is_mirror(left_subtree.right, right_subtree.left)
+        )
+
+    def is_symmetrical_iterative_solution(self):
+        # https://www.baeldung.com/cs/binary-tree-is-symmetric
+
+        queue = Queue()
+        queue.put(self.left)
+        queue.put(self.right)
+        while not queue.empty():
+            left = queue.get()
+            right = queue.get()
+
+            if left is None and right is None:
+                return True
+
+            if left is None or right is None:
+                return False
+
+            if left.value != right.value:
+                return False
+
+            queue.put(left.left)
+            queue.put(right.right)
+            queue.put(left.right)
+            queue.put(right.left)
+
+        return True
 
 if __name__ == "__main__":
 
@@ -259,7 +301,9 @@ if __name__ == "__main__":
                             Node('2', Node('4'), Node('3')))
 
     assert symmetrical_tree.is_symmetrical_recursive()
+    assert symmetrical_tree.is_symmetrical_recursive_solution()
     assert symmetrical_tree.is_symmetrical_iterative()
+    assert symmetrical_tree.is_symmetrical_iterative_solution()
 
     # check that tree is not symmetrical
     #      1
@@ -273,4 +317,6 @@ if __name__ == "__main__":
                                 Node('2', None, Node('3')))
 
     assert not non_symmetrical_tree.is_symmetrical_recursive()
+    assert not non_symmetrical_tree.is_symmetrical_recursive_solution()
     assert not non_symmetrical_tree.is_symmetrical_iterative()
+    assert not non_symmetrical_tree.is_symmetrical_iterative_solution()
