@@ -10,6 +10,7 @@ quick reference.
 - [reverse_linkedlist.py](py/reverse_linkedlist.py): Initialize and reverse a linked list
 - [binary_tree_traversal.py](py/binary_tree_traversal.py): Binary tree traversal
 - [quicksort.py](py/quicksort.py): Quicksort
+- [binary_search.py](py/binary_search.py): Binary Search
 
 ## Others
 
