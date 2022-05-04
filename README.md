@@ -5,11 +5,11 @@ quick reference.
 
 ## Index
 
-- Different approaches to fibonacci [fibonacci.py](py/fibonacci.py)
-- Hash table with separate chaining [hash_table.py](py/hash_table.py)
-- Initialize and reverse a linked list [reverse_linkedlist.py](py/reverse_linkedlist.py)
-- Binary tree traversal [binary_tree_traversal.py](py/binary_tree_traversal.py)
-- Quicksort [quicksort.py](py/quicksort.py)
+- [fibonacci.py](py/fibonacci.py): Different approaches to fibonacci
+- [hash_table.py](py/hash_table.py): Hash table with separate chaining
+- [reverse_linkedlist.py](py/reverse_linkedlist.py): Initialize and reverse a linked list
+- [binary_tree_traversal.py](py/binary_tree_traversal.py): Binary tree traversal
+- [quicksort.py](py/quicksort.py): Quicksort
 
 ## Others
 
