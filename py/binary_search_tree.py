@@ -28,7 +28,7 @@ def find(node, target_value):
 
 
 def find_iterative(node, target_value):
-
+    """Returns a subtree rooted with the given value"""
     current_node = node
     while current_node is not None:
         if current_node.value == target_value:
@@ -54,6 +54,7 @@ def insert(node, value):
 
 
 def delete(root, target):
+    """Delete node referencing target from tree """
 
     target_subtree, parent = _find_delete_target(root, target)
 
@@ -228,3 +229,7 @@ if __name__ == "__main__":
     assert new_root.value == 4
     assert new_root.right is None
     assert new_root.left.value == 3
+
+    root = TreeNode(4)
+    new_root = delete(root, 4)
+    assert new_root is None
