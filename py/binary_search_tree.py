@@ -71,7 +71,7 @@ def delete(root, target):
     if replacement_value is not None:
         target_subtree.value = replacement_value
 
-    # from this point on, target is a leaf node
+    # for the following 3 conditions, target is a leaf node
     # simply unhook from parent if it has one
     elif parent is None:
         # deleting root node with no children
@@ -81,6 +81,7 @@ def delete(root, target):
         parent.right = None
     else:
         parent.left = None
+
     return root
 
 def _retrieve_smallest_value(current_node, parent):
@@ -133,6 +134,83 @@ def _find_delete_target(root, target):
         
     return current_node, parent
 
+
+def delete_solution(root, target):
+    """Delete node referencing target from tree
+
+    Cleaner solution: https://www.techiedelight.com/deletion-from-bst/
+    """
+
+    # Base cases
+    if root is None:
+        root = None
+
+    if target < root.value:
+        root.left = delete_solution(root.left, target)
+
+    elif target > root.value:
+        root.right = delete_solution(root.right, target)
+
+    elif target == root.value:
+        # We've found the node to delete
+        # Different actions taken depending on presence of children
+
+        if root.left is None and root.right is None:
+            # No children, return None to the caller
+            root = None
+        
+        elif root.left is None:
+            # Has only a right child
+            # Replace current node with that child
+            root = root.right
+
+        elif root.right is None:
+            # Has only the left child
+            # Replace current with left child
+            root = root.left
+
+        else:
+            # At this point, node has both right and left children
+            # We can pick either the next largest or next smallest
+            # value in the tree to replace the current node
+
+            # We pick the next largest, i.e. the smallest value of
+            # the right subtree
+
+            replacement_value = _get_smallest(root.right)
+
+            # Recursively delete the node who's value we're
+            # using.
+
+            # Should work if we're deleting based on the 
+            # conditions above.
+            # It will because the smallest value in the subtree
+            # is either a leaf node (no children) or has one
+            # child
+
+            root.right = delete_solution(root.right, replacement_value)
+            root.value = replacement_value
+
+    return root
+
+
+def _get_smallest(node):
+    """Get's the smallest (leftmost) value in subtree"""
+
+    while node.left is not None:
+        node = node.left
+
+    return node.value
+
+
+def print_inorder(node):
+    if node.left:
+        print_inorder(node.left)
+    print(node.value, end="")
+    if node.right:
+        print_inorder(node.right)
+
+
 if __name__ == "__main__":
     # Search binary tree:
     #     4
@@ -173,6 +251,7 @@ if __name__ == "__main__":
     assert root.right.left.value == 5
 
     # Delete from binary search tree
+    # -------------------------------
     #      5
     #    /   \
     #   3     7
@@ -232,4 +311,79 @@ if __name__ == "__main__":
 
     root = TreeNode(4)
     new_root = delete(root, 4)
+    assert new_root is None
+
+
+    # Delete from binary search tree V2 (using solution)
+    # -------------------------------------------------
+    #      5
+    #    /   \
+    #   3     7
+    #  / \   / \
+    # 2   4 6   8
+
+    root = TreeNode(5,
+                    TreeNode(3,
+                             TreeNode(2),
+                             TreeNode(4)),
+                    TreeNode(7,
+                             TreeNode(6),
+                             TreeNode(8)))
+
+    print("\nDeleting 5")
+    new_root = delete_solution(root, 5)
+    print_inorder(new_root)
+    assert new_root.value == 6
+    assert new_root.right.left is None
+    assert new_root.right.right.value == 8
+
+    # Tree now looks like below
+    #      6
+    #    /   \
+    #   3     7
+    #  / \     \
+    # 2   4     8
+    # 
+    # Delete 7, 8 should take its place
+
+    print("\nDeleting 7")
+    new_root = delete_solution(new_root, 7)
+    print_inorder(new_root)
+    assert new_root.value == 6
+    assert new_root.right.value == 8
+    assert new_root.right.right is None
+    assert new_root.right.left is None
+
+    # Tree now looks like below
+    #      6
+    #    /   \
+    #   3     8
+    #  / \     
+    # 2   4     
+    # 
+    # Delete 6, 8 should take its place
+
+    print("\nDeleting 6")
+    new_root = delete_solution(new_root, 6)
+    print_inorder(new_root)
+    assert new_root.value == 8
+
+    assert new_root.right is None
+
+    # Tree now looks like below
+    #     8
+    #    /   
+    #   3     
+    #  / \     
+    # 2   4     
+    # 
+    # Delete 8, 4 should take its place
+    new_root = delete_solution(new_root, 8)
+    
+    assert new_root.value == 3
+    assert new_root.right.value == 4
+    assert new_root.left.value == 2
+
+    root = TreeNode(4)
+    new_root = delete_solution(root, 4)
     assert new_root is None
