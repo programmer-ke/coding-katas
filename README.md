@@ -11,7 +11,8 @@ quick reference.
 - [binary_tree_traversal.py](py/binary_tree_traversal.py): Binary tree traversal
 - [quicksort.py](py/quicksort.py): Quicksort
 - [binary_search.py](py/binary_search.py): Binary Search
-- [binary_search_tree.py](py/binary_search_tree.py): Binary Search Tree  
+- [binary_search_tree.py](py/binary_search_tree.py): Binary Search Tree
+- [kth_largest.py](py/kth_largest.py): Find kth largest element using binary search tree
 
 ## Others
 
