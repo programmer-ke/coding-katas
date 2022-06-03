@@ -116,6 +116,25 @@ class Node:
                 queue.put((node.right, node_level + 1))
         return node_level
 
+    def maximum_depth_recursive(self):
+
+        if self.left is None and self.right is None:
+            # No children
+            max_child_depth = 0
+        elif self.left and self.right:
+            # Have both left and right children
+            left_child_depth = self.left.maximum_depth_recursive()
+            right_child_depth = self.right.maximum_depth_recursive()
+            max_child_depth = left_child_depth if left_child_depth > right_child_depth else right_child_depth
+        elif self.left:
+            # have only the left child
+            max_child_depth = self.left.maximum_depth_recursive()
+        else:
+            # have only the right child
+            max_child_depth = self.right.maximum_depth_recursive()
+
+        return max_child_depth + 1
+
     def is_symmetrical_recursive(self):
         left_subtree = []
         right_subtree = []
@@ -288,6 +307,7 @@ if __name__ == "__main__":
     traversal.clear()
 
     assert root.maximum_depth() == 3
+    assert root.maximum_depth_recursive() == 3
 
     # check that tree is symmetrical
     #      1
