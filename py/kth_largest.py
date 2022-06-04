@@ -26,13 +26,14 @@ class KthLargest:
     def get_kth_largest(self):
         # count backwards in order k-1 times
         
-        k, kth_largest = self._inorder_backwards(self.root, self.k)
+        k, kth_largest = self._reverse_inorder(self.root, self.k)
         return kth_largest
 
-    def _inorder_backwards(self, node, k):
+    def _reverse_inorder(self, node, k):
+        """Traverse the tree inorder reversed (descending order)"""
         
         if node.right:
-            k, kth_largest = self._inorder_backwards(node.right, k)
+            k, kth_largest = self._reverse_inorder(node.right, k)
         
         if k == 0:
             # we already found the kth_largest
@@ -46,7 +47,7 @@ class KthLargest:
             return k, kth_largest
             
         if node.left:
-            k, kth_largest = self._inorder_backwards(node.left, k)
+            k, kth_largest = self._reverse_inorder(node.left, k)
         return k, kth_largest
       
     def _build_bst(self, nums):
