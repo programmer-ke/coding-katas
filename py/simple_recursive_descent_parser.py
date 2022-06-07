@@ -56,7 +56,7 @@ operator ::= +
          |   *
          |   /
 
-The definitions on the left can be expanded to those on the right.
+The definitions on the left are expanded to those on the right.
 This reads as:
 
 - An expression is either a number or a form.
@@ -70,13 +70,45 @@ This reads as:
 NUM and the operators above are terminal symbols, meaning that they 
 cannot be expanded any further. The goal is to expand an expression
 (recursively if necessary) until we're only left with terminal symbols
-that we can evaluate.
+that can be evaluated.
 
 More on BNF here: https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form
 
-The grammer above can more succintly be expressed in Extended BNF as
-follows:
-
-
-
+We then proceed with the implementation below.
 """
+import re
+import collections
+
+# We define regular expressions to extract the different types of
+# tokens from an input string
+
+NUM         = r'(?P<NUM>\d+)'
+PLUS        = r'(?P<PLUS>\+)'
+MINUS       = r'(?P<MINUS>-)'
+TIMES       = r'(?P<TIMES>\*)'
+DIVIDE      = r'(?P<DIVIDE>/)'
+LEFT_PAREN  = r'(?P<LEFT_PAREN>\()'
+RIGHT_PAREN = r'(?P<RIGHT_PAREN>\))'
+WHITESPACE  = r'(?P<WHITESPACE>\s+)'
+MISMATCH    = r'(?P<MISMATCH>.)'  # a catch all for any patterns we don't expect
+
+
+# Create a pattern that will match all of the above
+master_pattern = re.compile("|".join(
+    [NUM, PLUS, MINUS, TIMES, DIVIDE, LEFT_PAREN, RIGHT_PAREN,
+     WHITESPACE, MISMATCH]))
+
+
+# Create a generator for tokens
+# We use a namedtuple to create a lightweight class for the tokens
+Token = collections.namedtuple("Token", ["type", "value"])
+
+def generate_tokens(text):
+    for m in master_pattern.finditer(text):
+        token = Token(m.lastgroup, m.group())
+        if token.type == "MISMATCH":
+            raise SyntaxError(f"Unexpected token {token.value}")
+        elif token.type != "WHITESPACE":
+            yield token
+
+# todo: evaluator
