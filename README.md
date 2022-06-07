@@ -13,6 +13,7 @@ quick reference.
 - [binary_search.py](py/binary_search.py): Binary Search
 - [binary_search_tree.py](py/binary_search_tree.py): Binary Search Tree
 - [kth_largest.py](py/kth_largest.py): Find kth largest element using binary search tree
+- [heapsort.py](py/heapsort.py): Heapsort
 
 ## Others
 
