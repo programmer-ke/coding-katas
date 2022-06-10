@@ -48,8 +48,9 @@ expr     ::= NUM
 
 form     ::= ( operator operands )
 
-operands ::= expr expr
-         | operands expr
+operands ::= expr expr optional
+         
+optional ::= expr optional | none <-- todo: this eliminates left recursion but possibly adds extra condition
 
 operator ::= +
          |   -
@@ -111,4 +112,81 @@ def generate_tokens(text):
         elif token.type != "WHITESPACE":
             yield token
 
-# todo: evaluator
+
+class Evaluator:
+    """Parser for our expressions
+
+    Provides a method `parse` which when given input string,
+    parses it and executes it giving a result
+    """
+
+    def parse(self, input_string):
+        """Given an input string, evaluate it"""
+
+        self.tokens = generate_tokens(input_string)
+        
+        # root our grammar is expr, so call that first
+        self.expr()
+
+    def expr(self):
+        """expr ::= NUM | form
+        
+        An expression is either number or form"""
+
+        if self._accept("NUM"):
+            value = int(self.token.value)
+        else:
+            # 'descend' into form
+            value = self.form()
+        return value
+
+    def form(self):
+        """form ::= ( operator operands )
+
+        A form is an operator, followed by operands enclosed in parentheses"""
+
+        self._expect("LEFT_PAREN")
+
+        # 'descend' into operator and operands
+        operator = self.operator()
+        operands = self.operands()
+
+        # operands should be a list of two or more operands
+        # apply the operator on the operands
+        operand1, operand2, *rest = operands
+        result = self._apply(operator, operand1, operand2)
+        for operand in rest:
+            result = self._apply(operator, result, operand)
+
+        self._expect("RIGHT_PAREN")
+
+        return result
+
+    def operator(self):
+        """operator ::= + | - | * | / """
+
+        if (
+                self._accept("PLUS") or
+                self._accept("MINUS") or 
+                self._accept("TIMES") or 
+                self._accept("DIVIDE")
+        ):
+            return self.token.type
+        
+        raise SyntaxError("Expected PLUS or MINUS or TIMES or DIVIDE")
+
+    def operands(self):
+        """operands ::= expr expr | operands expr
+        
+        Operands are either 2 consecutive expressions, or
+        at least two consecutive expressions followed by
+        an expression"""
+
+        # todo: handle left recursion in this case
+
+        
+
+        
+
+            
+            
