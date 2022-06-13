@@ -15,6 +15,7 @@ quick reference.
 - [kth_largest.py](py/kth_largest.py): Find kth largest element using binary search tree
 - [heapsort.py](py/heapsort.py): Heapsort
 - [bit_manipulation.py](py/bit_manipulation.py): Bit manipulation
+- [simple_recursive_descent_parser.py](py/simple_recursive_descent_parser.py): A simple recursive descent parser
 
 ## Others
 

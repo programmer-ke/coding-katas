@@ -179,7 +179,6 @@ class Evaluator:
         result = self._apply(operator, first, second)
         for operand in rest:
             result = self._apply(operator, result, operand)
-
         self._expect("RIGHT_PAREN")
 
         return result
@@ -225,7 +224,7 @@ class Evaluator:
 
         FIRST_EXPR = ["NUM", "LEFT_PAREN"]  # FIRST(expr)
 
-        if self.next_token in FIRST_EXPR:
+        if self.next_token.type in FIRST_EXPR:
             operands.append(self.expr())
             operands += self.optional_operands()
 
@@ -271,7 +270,6 @@ evaluator = Evaluator()
 assert evaluator.parse("1") == 1
 assert evaluator.parse("(+ 1 2)") == 3
 assert evaluator.parse("(- 1 2)") == -1
-assert evaluator.parse("(* 5 2 3)") == 10  # todo: fails, fix
+assert evaluator.parse("(* 5 2 3)") == 30
 assert evaluator.parse("(/ 10 2)") == 5
-
-
+assert evaluator.parse("(+ (- 3 5) 2 (- 3 5) 2)") == 0
