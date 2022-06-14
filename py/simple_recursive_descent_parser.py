@@ -64,16 +64,16 @@ This reads as:
 
 - An expression is either a number or a form.
 - A form is composed of an operator followed by operands enclosed in
-  brackets
+  parentheses
 - Operands are a pair of expressions followed by an optional operand
 - An optional operand is an expression followed by another optional
-  operand, or None. This allows us to accept any number of optional
-  operands
+  operand, or None. This allows us to accept any additional number of
+  optional operands
 - An operator is one of +, -, /, *
 
 NUM and the operators above are terminal symbols, meaning that they 
 cannot be expanded any further. The goal is to expand an expression
-(recursively if necessary) until we're only left with terminal symbols
+(recursively if necessary) until we're have terminal symbols
 that can be evaluated.
 
 More on BNF here: https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form
@@ -108,6 +108,11 @@ master_pattern = re.compile("|".join(
 Token = collections.namedtuple("Token", ["type", "value"])
 
 def generate_tokens(text):
+    """Generates tokens identified by the regular expressions above
+
+    Accepts an input string and generates non-whitespace tokens
+    If a token is identified as a mismatch, raises an error
+    """
     for m in master_pattern.finditer(text):
         token = Token(m.lastgroup, m.group())
         if token.type == "MISMATCH":
@@ -220,7 +225,7 @@ class Evaluator:
         # Check if the next token is the first token of an expression
         # i.e. if token is in FIRST(expr) in parsing terminology
         # If so, collect it and move to the next optional token
-        # If the check fails, we have hit the terminal condition (None)
+        # If not, we have hit the terminal condition (None)
 
         FIRST_EXPR = ["NUM", "LEFT_PAREN"]  # FIRST(expr)
 
