@@ -22,8 +22,12 @@ def test(is_factorial):
     assert is_factorial(10000) == False
 
 
-def is_factorial_naive(num):
-    """Returns a boolean indicating whether num is a factorial"""
+def is_factorial(num):
+    """Returns a boolean indicating whether num is a factorial
+
+    for num > 1!, finds the next factorial >= num. If factorial
+    is equal, return True
+    """
 
     if num < 1:
         # n >= 0 and 0! = 1
@@ -51,4 +55,47 @@ def is_factorial_naive(num):
     return False
 
 
-test(is_factorial_naive)
+def is_factorial_alt(num):
+    """Returns a boolean indicating whether num is a factorial
+
+    Since a factorial is a product of integers > from 1...n,
+    where num > 1, dividing by each of 2, 3, 4, ... , n in 
+    sequence should result in 1 where num = !n
+    
+    https://math.stackexchange.com/a/923788
+    """
+
+    if num < 1:
+        # n >= 0 and 0! = 1
+        return False
+
+    if num == 1:
+        # (n = 0 and 0! = 1) or (n = 1 and n! = 1 * !0)
+        return True
+
+    n = 2
+
+    while num != 1:
+        # loop invariant: n >= 2 and num >= 1 and num // n >= 1
+        if num % n != 0:
+            return False
+
+        num = num // n
+        n += 1
+
+    return True
+
+
+test(is_factorial)
+test(is_factorial_alt)
+"""
+Note that `is_factorial_alt` seems to have a longer running time than
+the other for large values of the input where it is a factorial
+e.g 10000!
+
+But on average, it would likely detect a non-factorial quicker.
+
+Also, if one already knows the range of the input, the possible factorials
+could be pre-computed and cached. The check would then happen in
+constant time.
+"""

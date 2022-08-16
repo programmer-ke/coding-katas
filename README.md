@@ -5,17 +5,19 @@ quick reference.
 
 ## Index
 
-- [fibonacci.py](py/fibonacci.py): Different approaches to fibonacci
-- [hash_table.py](py/hash_table.py): Hash table with separate chaining
-- [reverse_linkedlist.py](py/reverse_linkedlist.py): Initialize and reverse a linked list
-- [binary_tree_traversal.py](py/binary_tree_traversal.py): Binary tree traversal
-- [quicksort.py](py/quicksort.py): Quicksort
-- [binary_search.py](py/binary_search.py): Binary Search
-- [binary_search_tree.py](py/binary_search_tree.py): Binary Search Tree
-- [kth_largest.py](py/kth_largest.py): Find kth largest element using binary search tree
-- [heapsort.py](py/heapsort.py): Heapsort
-- [bit_manipulation.py](py/bit_manipulation.py): Bit manipulation
+- [factorials](py/factorials.py)
 - [simple_recursive_descent_parser.py](py/simple_recursive_descent_parser.py): A simple recursive descent parser
+- [bit_manipulation.py](py/bit_manipulation.py): Bit manipulation
+- [heapsort.py](py/heapsort.py): Heapsort
+- [kth_largest.py](py/kth_largest.py): Find kth largest element using binary search tree
+- [binary_search_tree.py](py/binary_search_tree.py): Binary Search Tree
+- [binary_search.py](py/binary_search.py): Binary Search
+- [quicksort.py](py/quicksort.py): Quicksort
+- [binary_tree_traversal.py](py/binary_tree_traversal.py): Binary tree traversal
+- [reverse_linkedlist.py](py/reverse_linkedlist.py): Initialize and reverse a linked list
+- [hash_table.py](py/hash_table.py): Hash table with separate chaining
+- [fibonacci.py](py/fibonacci.py): Different approaches to fibonacci
+
 
 ## Others
 
