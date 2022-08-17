@@ -46,13 +46,8 @@ def is_factorial(num):
         n += 1
         fct *= n
         
-    
-    if fct == num:
-        # n! = num
-        return True
-
-    # n! > num
-    return False
+    # (fct == n! and fct == num) or False
+    return fct == num
 
 
 def is_factorial_alt(num):
@@ -78,24 +73,27 @@ def is_factorial_alt(num):
     while num != 1:
         # loop invariant: n >= 2 and num >= 1 and num // n >= 1
         if num % n != 0:
-            return False
+            break
 
         num = num // n
         n += 1
 
-    return True
+    return num == 1
 
 
 test(is_factorial)
 test(is_factorial_alt)
 """
-Note that `is_factorial_alt` seems to have a longer running time than
-the other for large values of the input where it is a factorial
-e.g 10000!
+Note that `is_factorial_alt` seems to have a larger running time than
+the `is_factorial` for large values of the num where num is a
+factorial e.g 10000!
 
-But on average, it would likely detect a non-factorial quicker.
+Probably due to division being a more expensive operation than
+multiplication.
 
-Also, if one already knows the range of the input, the possible factorials
-could be pre-computed and cached. The check would then happen in
-constant time.
+But on average, it is likely to detect a non-factorial quicker.
+
+Also, if one already knows the range of the input, the possible
+factorials could be pre-computed and cached. The check would then
+happen in constant time.
 """
