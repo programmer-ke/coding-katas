@@ -36,14 +36,15 @@ Each term (x^i)/i! can be calculated in a manner like below:
 """
 
 def calculate_term(x, i):
+    """x^i/i!"""
     term = 1
     for n in range(1, i+1):
         term *= x / n
 
     return term
 
-assert calculate_term(1, 2) == 1/2                # 1^2/2!
-assert calculate_term(1, 4) == 1/(4 * 3 * 2 * 1)  # 1^4/4!
+assert calculate_term(1, 2) == 1/2                    # 1^2/2!
+assert calculate_term(2, 4) == 2**4 /(4 * 3 * 2 * 1)  # 2^4/4!
         
 """
 However, we notice some repeated computations for each additional term
