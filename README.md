@@ -5,6 +5,7 @@ quick reference.
 
 ## Index
 
+- [cosine](py/cosine.py)
 - [factorials](py/factorials.py)
 - [simple_recursive_descent_parser.py](py/simple_recursive_descent_parser.py): A simple recursive descent parser
 - [bit_manipulation.py](py/bit_manipulation.py): Bit manipulation
