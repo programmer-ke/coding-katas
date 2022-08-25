@@ -1,4 +1,5 @@
-# Fibonacci sequence: https://www.mathsisfun.com/numbers/fibonacci-sequence.html
+# Fibonacci sequence:
+# https://www.mathsisfun.com/numbers/fibonacci-sequence.html
 
 
 def fib(n):
@@ -7,6 +8,7 @@ def fib(n):
     if n == 1:
         return 1
     if n > 1:
+        # note the repeated computations
         return fib(n - 1) + fib(n - 2)
 
 
@@ -37,6 +39,24 @@ def fib_iterative2(n):
             i += 1
     return num
 
+def fib_iterative3(n):
+    if n == 0:
+        return 0
+    if n == 1:
+        return 1
+    i = 1
+    a, b = 0, 1
+    while True:
+        # re-assigns the next out of use variable
+        i += 1
+        a = a + b
+        if i == n:
+            return a
+        i += 1
+        b = a + b
+        if i == n:
+            return b
+
 
 if __name__ == "__main__":
 
@@ -52,3 +72,7 @@ if __name__ == "__main__":
     # iterative 2
     iterative_2 = [fib_iterative2(i) for i in range(11)]
     assert expected == iterative_2
+
+    # iterative 3
+    iterative_3 = [fib_iterative3(i) for i in range(11)]
+    assert expected == iterative_3
