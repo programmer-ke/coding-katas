@@ -47,16 +47,12 @@ def fib_iterative3(n):
     i = 1
     a, b = 0, 1
     while True:
-        # re-assigns the next out of use variable
+        # advance a and b in a single iteration
+        a, b = b, a + b
         i += 1
-        a = a + b
         if i == n:
-            return a
-        i += 1
-        b = a + b
-        if i == n:
-            return b
-
+            break
+    return b
 
 if __name__ == "__main__":
 
