@@ -1,8 +1,7 @@
 """
-A general procedure that will convert a number from one base to another
-where base is between 2 and 36 and number is an integer greater than
-or equal to zero i.e.
-2 <= base <= 36 and number is in the set of natural numbers.
+A general procedure that will convert a number from one base to
+another where the base ranges from 2 and 36 and the number is
+an integer greater than or equal to zero.
 
 For representation, we'll use the characters ranges 0-9 and a-z which
 will give us a total of 36 possible characters for each place
@@ -16,11 +15,11 @@ The general approach is, given a number in a particular input
 representation, find its value and convert it into the expected output
 representation.
 
-Characters '0', '1', '2', ... '9' each represents the values 0, 1, 2,
+Characters '0', '1', '2', ... '9' each represents the numbers 0, 1, 2,
 ..., 9.  Characters 'a', 'b', 'c', ..., 'z' each represent values 10,
 11, 12, ..., 35.
 
-We therefore need routines to convert from character to value and
+We will need routines to convert from character to value and
 vice versa.
 """
 
