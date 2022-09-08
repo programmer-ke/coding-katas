@@ -13,8 +13,45 @@ e.g. '10' to base 10 is the number 10 and to base 2 is the value 2
 
 The general approach is, given a number in a particular input
 representation, find its value and convert it into the expected output
-representation.
+representation."""
 
+def baseconvert(input_repr, from_base, to_base):
+    """Converts number representation between bases"""
+
+    value = get_value(input_repr, from_base)
+    output_repr = convert_num(value, to_base)
+    return output_repr
+
+
+def get_value(num_repr, base):
+    """Returns the intrinsic value of the number
+
+    The inputs are the string representation of the number to the
+    given base.
+
+    Looking at an example, '125' to base 10 is equivalent to
+    (1 * 10^3 + 2 * 10^2 + 5 * 10^0)
+
+    So moving from most significant to least significant characters,
+    get the character at that place value, add its value to the
+    accumulation so far, and multiply by the base as long as there are
+    more significant characters left.
+
+    After doing this for all the characters in the string
+    representation, we'll have the accumulation as the sum of the
+    value of each character multiplied by the base raised to the
+    appropriate power. This is its instrinsic value
+    """
+    assert 2 <= base <= 36
+    acc = 0
+
+    for char in num_repr:
+        acc *= base
+        acc += char2num(char)
+
+    return acc
+
+"""
 Characters '0', '1', '2', ... '9' each represents the numbers 0, 1, 2,
 ..., 9.  Characters 'a', 'b', 'c', ..., 'z' each represent values 10,
 11, 12, ..., 35.
@@ -39,20 +76,6 @@ def char2num(char):
         num -= 39
     return num
 
-assert char2num('0') == 0
-assert char2num('9') == 9
-assert char2num('a') == 10
-assert char2num('z') == 35
-
-try:
-    # should throw an error
-    char2num(';')
-except Exception as exc:
-    assert isinstance(exc, AssertionError)
-else:
-    assert False, "Failed to raise error"
-
-
 def num2char(num):
     """Returns char representation of number value
 
@@ -67,15 +90,36 @@ def num2char(num):
     char = chr(ord('0') + num)
     return char
 
-assert num2char(0) == '0'
-assert num2char(9) == '9'
-assert num2char(10) == 'a'
-assert num2char(35) == 'z'
+def test():
+    assert char2num('0') == 0
+    assert char2num('9') == 9
+    assert char2num('a') == 10
+    assert char2num('z') == 35
 
-try:
-    # should throw an error
-    num2char(36)
-except Exception as exc:
-    assert isinstance(exc, AssertionError)
-else:
-    assert False, "Failed to raise error"
+    try:
+        # should throw an error
+        char2num(';')
+    except Exception as exc:
+        assert isinstance(exc, AssertionError)
+    else:
+        assert False, "Failed to raise error"
+
+    try:
+        # should throw an error
+        num2char(36)
+    except Exception as exc:
+        assert isinstance(exc, AssertionError)
+    else:
+        assert False, "Failed to raise error"
+
+    assert num2char(0) == '0'
+    assert num2char(9) == '9'
+    assert num2char(10) == 'a'
+    assert num2char(35) == 'z'
+
+    assert get_value('15', base=10) == 15
+    assert get_value('11', base=2) == 3
+
+    assert baseconvert('15', from_base=10, to_base=2) == '1111'
+
+test()
