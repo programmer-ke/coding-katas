@@ -19,44 +19,15 @@ def baseconvert(input_repr, from_base, to_base):
     """Converts number representation between bases"""
 
     value = get_value(input_repr, from_base)
-    output_repr = convert_num(value, to_base)
+    output_repr = get_repr(value, to_base)
     return output_repr
 
-
-def get_value(num_repr, base):
-    """Returns the intrinsic value of the number
-
-    The inputs are the string representation of the number to the
-    given base.
-
-    Looking at an example, '125' to base 10 is equivalent to
-    (1 * 10^3 + 2 * 10^2 + 5 * 10^0)
-
-    So moving from most significant to least significant characters,
-    get the character at that place value, add its value to the
-    accumulation so far, and multiply by the base as long as there are
-    more significant characters left.
-
-    After doing this for all the characters in the string
-    representation, we'll have the accumulation as the sum of the
-    value of each character multiplied by the base raised to the
-    appropriate power. This is its instrinsic value
-    """
-    assert 2 <= base <= 36
-    acc = 0
-
-    for char in num_repr:
-        acc *= base
-        acc += char2num(char)
-
-    return acc
-
 """
-Characters '0', '1', '2', ... '9' each represents the numbers 0, 1, 2,
+Characters '0', '1', '2', ... '9' each represents the values 0, 1, 2,
 ..., 9.  Characters 'a', 'b', 'c', ..., 'z' each represent values 10,
 11, 12, ..., 35.
 
-We will need routines to convert from character to value and
+We will need routines to convert from character to num values and
 vice versa.
 """
 
@@ -90,6 +61,67 @@ def num2char(num):
     char = chr(ord('0') + num)
     return char
 
+
+def get_value(num_repr, base):
+    """Returns the intrinsic value of the number
+
+    The inputs are the string representation of the number to the
+    given base.
+
+    Looking at an example, '125' to base 10 is equivalent to
+    (1 * 10^3 + 2 * 10^2 + 5 * 10^0)
+
+    So moving from most significant to least significant characters,
+    get the character at that place value, add its value to the
+    accumulation so far, and multiply by the base as long as there are
+    more significant characters left.
+
+    After doing this for all the characters in the string
+    representation, we'll have the accumulation as the sum of the
+    value of each character multiplied by the base raised to the
+    appropriate power. This is its instrinsic value
+    """
+    assert 2 <= base <= 36
+    char_ints = [char2num(char) for char in num_repr]
+    assert all([v  < base for v in char_ints])
+
+    acc = 0
+
+    for v in char_ints:
+        acc *= base
+        acc += v
+
+    return acc
+
+
+def get_repr(number_value, base):
+    """Returns the representation of the number value in the given base
+
+    Say we want to convert 115 to a base 10 representation.
+    We'll do so with a sequence of divmod  calculations using the base.
+    
+    115 divmod 10 = 11, 5
+    11 divmod 10 = 1, 1
+    1 divmod 10 = 0, 1
+
+    The remainders give us the digit sequence from least to most
+    significant.  We stop when the numerator is zero. We'll generalize
+    this algorithm for any base 2..36
+    """
+    assert 2 <= base <= 36 and number_value >= 0
+
+    num_repr_reverse = []
+    numerator = number_value
+
+    while numerator > 0:
+        numerator, remainder = divmod(numerator, base)
+        num_repr_reverse.append(remainder)
+
+    # convert from ints to chars and 
+    # reverse as is conventional representation
+    num_repr = ''.join(reversed([num2char(n) for n in num_repr_reverse]))
+    return num_repr or '0'
+
 def test():
     assert char2num('0') == 0
     assert char2num('9') == 9
@@ -120,6 +152,14 @@ def test():
     assert get_value('15', base=10) == 15
     assert get_value('11', base=2) == 3
 
-    assert baseconvert('15', from_base=10, to_base=2) == '1111'
+    assert get_repr(15, base=10) == '15'
+    assert get_repr(3, base=2) == '11'
+    assert get_repr(0, base=2) == '0'
+    assert get_repr(0, base=36) == '0'
 
+    assert baseconvert('15', from_base=10, to_base=2) == '1111'
+    assert baseconvert('15', from_base=10, to_base=3) == '120'
+    assert baseconvert('255', from_base=10, to_base=8) == '377'
+    assert baseconvert('ff', from_base=16, to_base=2) == '11111111'
+    assert baseconvert('0', from_base=36, to_base=2) == '0'
 test()
