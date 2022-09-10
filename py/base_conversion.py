@@ -80,6 +80,10 @@ def get_value(num_repr, base):
     representation, we'll have the accumulation as the sum of the
     value of each character multiplied by the base raised to the
     appropriate power. This is its instrinsic value
+
+    Time complexity of this function depends on length of the
+    input number representation because the operations are
+    performed per character of the representation.
     """
     assert 2 <= base <= 36
     char_ints = [char2num(char) for char in num_repr]
@@ -107,6 +111,10 @@ def get_repr(number_value, base):
     The remainders give us the digit sequence from least to most
     significant.  We stop when the numerator is zero. We'll generalize
     this algorithm for any base 2..36
+
+    The time complexity of this function is log to the given base
+    of the number because we divide the number by the base until
+    the quotient is zero.
     """
     assert 2 <= base <= 36 and number_value >= 0
 
@@ -118,9 +126,18 @@ def get_repr(number_value, base):
         num_repr_reverse.append(remainder)
 
     # convert from ints to chars and 
-    # reverse as is conventional representation
+    # change to conventional most- to least-significant characters
     num_repr = ''.join(reversed([num2char(n) for n in num_repr_reverse]))
     return num_repr or '0'
+
+"""
+The time complexity of `baseconvert` depends on the length of the
+input number representation, the number and the base of the output.
+
+If the length of the input is n, the number being x and the output
+being y, overall time complexity is
+O(n) + O(log(x, y))
+"""
 
 def test():
     assert char2num('0') == 0

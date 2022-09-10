@@ -5,8 +5,9 @@ quick reference.
 
 ## Index
 
-- [cosine](py/cosine.py): Calculate cosine using the taylor series
-- [factorials](py/factorials.py): Check if a number is a factorial
+- [base_conversion.py](py/base_conversion.py): Convert a number from on base to another
+- [cosine.py](py/cosine.py): Calculate cosine using the taylor series
+- [factorials.py](py/factorials.py): Check if a number is a factorial
 - [simple_recursive_descent_parser.py](py/simple_recursive_descent_parser.py): A simple recursive descent parser
 - [bit_manipulation.py](py/bit_manipulation.py): Bit manipulation
 - [heapsort.py](py/heapsort.py): Heapsort
