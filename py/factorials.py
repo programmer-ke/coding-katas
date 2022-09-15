@@ -15,11 +15,11 @@ def test(is_factorial):
         assert is_factorial(num) == False
 
     # We can now test with known values
-    assert is_factorial(2) == True # 2!
-    assert is_factorial(5040) == True # 7!
-    assert is_factorial(5) == False
-    assert is_factorial(892) == False
-    assert is_factorial(10000) == False
+    assert is_factorial(2) # 2!
+    assert is_factorial(5040) # 7!
+    assert not is_factorial(5)
+    assert not is_factorial(892)
+    assert not is_factorial(10000)
 
 
 def is_factorial(num):
@@ -70,8 +70,8 @@ def is_factorial_alt(num):
 
     n = 2
 
-    while num != 1:
-        # loop invariant: n >= 2 and num >= 1 and num // n >= 1
+    while num > 1:
+        # loop invariant: n >= 2 and num >= 1
         if num % n != 0:
             break
 
