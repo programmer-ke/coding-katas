@@ -33,19 +33,54 @@ def square_root_naive(num, initial_guess):
     # We can tolerate an error of at most 0.0001
     tolerance = 0.0001
     guess = initial_guess
-    diff = 1 * (-1 if guess**2 > num else 1)
+    guess_squared = guess**2
+    diff = 1 * (-1 if guess_squared > num else 1)
 
-    while abs(num - guess**2) > tolerance:
+    while not _close_enough(num, guess_squared, tolerance):
         # loop invariant:
         # guess**2 > num and diff < 0 or guess**2 < num and diff > 0
+        # we're converging to num
         guess += diff
-
-        if (guess**2 > num and diff > 0) or (guess**2 < num and diff < 0):
-            # change sign of diff and divide by 10
-            diff = (diff * 0.1) * -1
+        guess_squared = guess**2
+        
+        if _guess_overshoots_target(num, guess_squared, diff):
+            diff = _change_direction(_make_smaller(diff, divisor=10))
 
     return guess
 
-assert square_root_naive(4, 2) == 2
-assert square_root_naive(16, 7) == 4
+
+def _close_enough(num1, num2, threshold):
+    return abs(num1 - num2) < threshold
+
+
+def _guess_overshoots_target(target, actual, direction):
+    """Boolean indicating if we've exceeded or subceeded the target
+
+    If we were adding to the guess, we have exceeded the target, 
+    and if we were subtracting, we have subceeded it"""
+    return (
+        (actual > target and direction > 0) or
+        (actual < target and direction < 0)
+    )
+
+
+def _change_direction(num): return num * -1
+
+
+def _make_smaller(num, divisor): return num / divisor
+
+
+assert square_root_naive(4, initial_guess=2) == 2
+assert square_root_naive(16, initial_guess=7) == 4
 assert abs(square_root_naive(12, 2) ** 2 - 12) <= 0.0001
+
+"""
+With the algorithm above, we see that our initial choice significantly
+affects how many iterations it takes to converge to the correct answer.
+
+With each iteration, we modify our guess by a constant amount, and
+cannot adjust this by how far away we are from the target.
+
+How can we ensure we take the most efficient route to finding the
+best estimate?
+"""
