@@ -157,7 +157,4 @@ we're halving the distance between the guess and its complementary,
 This has the overall effect of repeatedly dividing the error from the
 square by 2 with each iteration, which would converge faster than the
 previous approach.
-
-Asymtpotically, the running time complexity of the second approach,
-given an input N, is O(log to the base 2 of N) or O(logN)
 """
