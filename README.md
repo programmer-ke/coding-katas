@@ -5,6 +5,7 @@ quick reference.
 
 ## Index
 
+- [square_root.py](py/square_root.py): Calculate square root of a number
 - [base_conversion.py](py/base_conversion.py): Convert a number from on base to another
 - [cosine.py](py/cosine.py): Calculate cosine using the taylor series
 - [factorials.py](py/factorials.py): Check if a number is a factorial
