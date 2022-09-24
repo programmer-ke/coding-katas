@@ -1,7 +1,7 @@
 """
 Problem: Given a positive number, calculate its square root
 
-One approach is making a series of guesses until we get the
+An approach would be making a series of guesses until we get the
 correct answer (or one that is close enough).
 
 For example, when calculating the square root of 12, we can
@@ -32,12 +32,13 @@ def square_root_naive(num, initial_guess):
     assert num > 0 and initial_guess > 0
 
     # We can tolerate an error less than 0.000001
-    tolerance = 1e-6
+    close_enough = lambda x, y: abs(x - y) < 1e-6
+
     guess = initial_guess
     guess_squared = guess**2
     diff = 1 * (-1 if guess_squared > num else 1)
 
-    while not _close_enough(num, guess_squared, tolerance):
+    while not close_enough(num, guess_squared):
         # loop invariant:
         # guess**2 > num and diff < 0 or guess**2 < num and diff > 0
         # we're converging to num
@@ -48,10 +49,6 @@ def square_root_naive(num, initial_guess):
             diff = _change_direction(_make_smaller(diff, divisor=10))
 
     return guess
-
-
-def _close_enough(num1, num2, threshold):
-    return abs(num1 - num2) < threshold
 
 
 def _guess_overshoots_target(target, actual, direction):
@@ -66,8 +63,6 @@ def _guess_overshoots_target(target, actual, direction):
 
 
 def _change_direction(num): return num * -1
-
-
 def _make_smaller(num, divisor): return num / divisor
 
 
@@ -99,8 +94,8 @@ value which is 2, and 2 * 2 = 4.
 So 10 is on one extreme from the square root of 20 and 2 is on the
 other.
 
-The square root is somewhere between 2 and 10. We therefore determine
-the average of those two and use that as our next guess.
+The square root is somewhere between 2 and 10. We calculate the
+average of those two and use that as our next guess.
 
 (10 + 2)/2 = 6
 
@@ -124,12 +119,12 @@ The trend shows that we're converging to the square root of 20. We can
 repeat the same process iteratively until there is no significant
 change in our guess. This means that we are very close to the square
 root of our target, and can therefore use the latest guess as its
-square root.
+square root. (The square root of 20 is approx 4.4721).
 
 For our purposes, we can stop when the difference between the previous
-guess and the latest guess is less than 0.0001 i.e.
+guess and the latest guess is less than 0.000001 i.e.
 
-abs(latest_guess - prev_guess) < 0.0001
+abs(latest_guess - prev_guess) < 0.000001
 """
 
 def square_root_improved(target):
@@ -137,17 +132,32 @@ def square_root_improved(target):
 
     assert target > 0
 
-    tolerance = 1e-6
+    # We can tolerate an error less than 0.000001
+    close_enough = lambda x, y: abs(x - y) < 1e-6
+
     latest_guess = target / 2
 
+    i = 0
     while True:
         prev_guess = latest_guess
         latest_guess = ((target / prev_guess) + prev_guess) / 2
-        if _close_enough(latest_guess, prev_guess, tolerance):
+        if close_enough(latest_guess, prev_guess):
             break
-        
     return latest_guess
 
 assert square_root_improved(4) == math.sqrt(4)
 assert math.isclose(square_root_improved(16), math.sqrt(16))
 assert math.isclose(square_root_improved(0.02), math.sqrt(0.02))
+
+"""
+The second approach improves on the first one by making bigger jumps
+the further off the guess is from the square root. With each iteration,
+we're halving the distance between the guess and its complementary,
+
+This has the overall effect of repeatedly dividing the error from the
+square by 2 with each iteration, which would converge faster than the
+previous approach.
+
+Asymtpotically, the running time complexity of the second approach,
+given an input N, is O(log to the base 2 of N) or O(logN)
+"""
