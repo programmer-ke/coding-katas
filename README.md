@@ -24,7 +24,7 @@ quick reference.
 
 ## Others
 
-These are code samples by other folk that I include here for reference
+These are code samples by other sources that I include here for reference
 
 - Max Connected colours in a grid [code](others/max_connected.py)
 - Basic sorting Algorithms [code](others/sorting_algos.py)
