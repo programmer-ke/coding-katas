@@ -100,6 +100,9 @@ assert gcd(2, 2) == 2
 assert gcd(20, 6) == 2
 assert gcd(80, 6) == 2
 assert gcd(6, 80) == 2  # can you see why this works?
+assert gcd(7, 103) == 1
+assert gcd(322, 112) == 14
+
 
 """
 This can also be represented recursively, which maps more closely to
@@ -124,7 +127,8 @@ assert gcd(2, 2) == 2
 assert gcd(20, 6) == 2
 assert gcd(80, 6) == 2
 assert gcd(6, 80) == 2
-
+assert gcd(7, 103) == 1
+assert gcd(322, 112) == 14
 
 """
 The worst case scenario for this final approach is when calculating
