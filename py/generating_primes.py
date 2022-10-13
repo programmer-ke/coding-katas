@@ -47,5 +47,62 @@ the remaining numbers are primes less than or equal to 30.
 This algorithm is known as the Sieve of Eratosthenes:
 https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes
 
-We can implement an algorithm similar the above:
+An implementation of it follows. An optimization we'll make is to
+only cancel out multiples of each prime from the square of the prime
+onwards, because it is guaranteed that any multiples less than the
+square of the prime have been cancelled out
+"""
+
+def sieve_of_eratosthenes(n):
+    """Return primes less than or equal to n
+
+    We use a list who's value at each index specifies
+    whether (index + 1) is prime"""
+
+    assert n > 1
+
+    is_prime_list = [True] * n
+    _mark_not_prime(is_prime_list, 1)  # 1 is not a prime number
+
+    prev = 1
+
+    while True:
+        prime = _get_next_prime(is_prime_list, prev)
+        multiple = prime**2
+
+        if multiple > n:
+            # prime is greater than square root of n
+            break
+
+        while not multiple > n:
+            _mark_not_prime(is_prime_list, multiple)
+            multiple += prime
+
+        prev = prime
+
+    return [i+1 for i in range(n) if is_prime_list[i]]
+    
+
+def _mark_not_prime(is_prime_list, num):
+    is_prime_list[num - 1] = False
+
+
+def _get_next_prime(is_prime_list, prev):
+    """Get the next number after prev yet to be marked out"""
+
+    n = len(is_prime_list)
+    assert not prev > n
+
+    for i in range(prev, len(is_prime_list)):
+        if is_prime_list[i] == True:
+            return i+1
+    return None  # made explicit
+
+assert sieve_of_eratosthenes(2) == [2]
+assert sieve_of_eratosthenes(10) == [2, 3, 5, 7]
+
+
+"""
+Memory error on 10**10
+Memory usage on 10**9 at 7.4 GB, resulting list at 424 MB
 """
