@@ -103,6 +103,21 @@ assert sieve_of_eratosthenes(10) == [2, 3, 5, 7]
 
 
 """
-Memory error on 10**10
-Memory usage on 10**9 at 7.4 GB, resulting list at 424 MB
+An issue with this approach is the space requirements relative to the
+number of primes upto the number n, because the initial list created 
+before marking out non-primes has n elements i.e. a space complexity
+of O(n), whereas the final list of primes is much smaller.
+
+For example, on my machine, when n is set to 1e10 (10 to the power 10),
+the function above throws a MemoryError exception. When set to a 10th
+of that, i.e. 1e9, the function uses 7.4 GB of memory whereas the
+resulting list of primes takes up 424 MB.
+
+We also notice with the above algorithm that some numbers will be
+marked out more than once. For instance, 30 will be marked out thrice
+as a factor of 2, 3 and 5.
+
+Therefore, two avenues of improving over this algorithm are to reduce
+the amount of space required, and to reduce the amount of comparisons
+needed to do determine primality
 """
