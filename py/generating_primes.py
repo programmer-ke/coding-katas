@@ -59,7 +59,7 @@ def sieve_of_eratosthenes(n):
     We use a list who's value at each index specifies
     whether (index + 1) is prime"""
 
-    assert n > 1
+    assert n > 0
 
     is_prime_list = [True] * n
     _mark_not_prime(is_prime_list, 1)  # 1 is not a prime number
@@ -68,10 +68,10 @@ def sieve_of_eratosthenes(n):
 
     while True:
         prime = _get_next_prime(is_prime_list, prev)
-        multiple = prime**2
+        multiple = None if prime is None else prime**2
 
-        if multiple > n:
-            # prime is greater than square root of n
+        if multiple is None or multiple > n:
+            # No need for further checks
             break
 
         while not multiple > n:
@@ -98,6 +98,7 @@ def _get_next_prime(is_prime_list, prev):
             return i+1
     return None  # made explicit
 
+assert sieve_of_eratosthenes(1) == []
 assert sieve_of_eratosthenes(2) == [2]
 assert sieve_of_eratosthenes(10) == [2, 3, 5, 7]
 
@@ -119,5 +120,35 @@ as a factor of 2, 3 and 5.
 
 Therefore, two avenues of improving over this algorithm are to reduce
 the amount of space required, and to reduce the amount of comparisons
-needed to do determine primality
+needed to do determine primality.
+
+To determine if a number x is a prime number, it is only necessary to
+check if it is divisible by all primes less than or equal to sqrt(x),
+because if it is divisible by a composite number, the number already
+is itself divisible by a smaller prime number.
+
+We don't need to check for primes > sqrt(x) because they cannot
+equally divide x.
+
+This minimises the number of checks for primality per number to the
+bare minimum.
+
+To tackle the issue of excessive space used by the previous algorithm,
+we'll generate numbers on the fly upto the upper limit n, testing each
+for primality, discarding non-primes and retaining only the primes.
+
+An overall algorithm would be like follows.
 """
+
+def generate_primes(n):
+    """Generate all primes less than or equal to n"""
+
+    primes_list = []
+    while True:
+        # generate next x
+        # if x > n break else
+        # test whether divisible by primes <= sqrt(x)
+        # add to list of primes
+        pass
+
+    return primes_list
