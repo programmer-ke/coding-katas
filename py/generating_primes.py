@@ -141,14 +141,43 @@ An overall algorithm would be like follows.
 """
 
 def generate_primes(n):
-    """Generate all primes less than or equal to n"""
+    """Return all primes less than or equal to n"""
+
+    assert n > 0
 
     primes_list = []
-    while True:
-        # generate next x
-        # if x > n break else
-        # test whether divisible by primes <= sqrt(x)
-        # add to list of primes
-        pass
 
+    for prime_candidate in _generate_prime_candidates(upto=n):
+        if _is_prime(prime_candidate, primes_list):
+            primes_list.append(prime_candidate)
     return primes_list
+
+"""
+When generating candidates for testing for primality, we already know
+that any even number greater than 2 is not prime, so we can exclude
+even numbers to reduce the number of redundant checks.
+
+Given that x is an odd number, the sequence
+
+x = x + 2 will generate odd numbers
+"""
+
+x, l = 3, []
+while x < 10:
+    l.append(x)
+    x += 2
+assert l == [3, 5, 7, 9]
+
+"""
+Can we just as easily eliminate factors of 3? We start by listing the
+sequence with factors of 2 and 3 removed to see whether we can
+identify any patterns.
+
+
+"""
+
+def _generate_prime_candidates():
+    return []
+
+def _is_prime():
+    pass
