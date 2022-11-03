@@ -141,16 +141,23 @@ An overall algorithm would be like follows.
 """
 
 def generate_primes(n):
-    """Return all primes less than or equal to n"""
+    """Return all primes less than or equal to n
+
+    All prime numbers upto n are indivisible by all
+    prime numbers <= sqrt(n)
+    """
 
     assert n > 0
 
-    primes_list = []
+    prime_testers = []
 
     for prime_candidate in _generate_prime_candidates(maxnum=n):
-        if _is_prime(prime_candidate, primes_list):
-            primes_list.append(prime_candidate)
-    return primes_list
+
+        if _is_prime(prime_candidate, prime_testers):
+            yield prime_candidate
+
+            if prime_candidate ** 2 <= n:
+                prime_testers.append(prime_candidate)
 
 """
 When generating candidates for testing for primality, we already know
@@ -200,7 +207,7 @@ much more complex.
 
 Using the algorithm above, we can now generate a sequence of candidates
 for prime numbers eliminating multiples of 2 and 3. This reduces the
-number of unnecessary checks for primality we need to perform.
+number of primality checks we need to perform by more than a half.
 """
 
 def _generate_prime_candidates(maxnum):
@@ -227,6 +234,49 @@ def _generate_prime_candidates(maxnum):
 assert list(_generate_prime_candidates(1)) == []
 assert list(_generate_prime_candidates(20)) == [2, 3, 5, 7, 11, 13, 17, 19]
 
+"""
+Final piece of this approach is to determine whether a prime candidate
+is a prime number.
+"""
+import math
 
-def _is_prime():
+def _is_prime(candidate, prime_divisors):
+    """Returns a boolean indicating whether the candidate is prime
+
+    The candidate is prime if it is indivisible by any number
+    less than or equal to its square root"""
+    
+    # We should not run out of prime divisors to test for primality
+    assert candidate == 2 or prime_divisors[-1] ** 2 >= candidate
+
+    if candidate == 2:
+        return True
+
+
+    sqrt_candidate = math.sqrt(candidate)
+    index = 0
+        
+    while prime_divisors[index] <= sqrt_candidate:
+        rem = candidate % prime_divisors[index]
+        if rem == 0:
+            return False
+        index += 1
+
+    return True
+
+
+assert _is_prime(2, []) == True
+assert _is_prime(6, [2, 3, 5]) == False
+assert _is_prime(23, [2, 3, 5]) == True
+
+try:
+    _is_prime(23, [2, 3])
+except AssertionError:
     pass
+else:
+    assert False, "Did not detect insufficient prime divisors"
+
+
+assert list(generate_primes(1)) == []
+assert list(generate_primes(2)) == [2]
+assert list(generate_primes(10)) == [2, 3, 5, 7]
