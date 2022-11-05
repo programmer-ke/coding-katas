@@ -270,13 +270,6 @@ assert _is_prime(2, []) == True
 assert _is_prime(6, [2, 3, 5]) == False
 assert _is_prime(23, [2, 3, 5]) == True
 
-try:
-    _is_prime(23, [2, 3])
-except AssertionError:
-    pass
-else:
-    assert False, "Did not detect insufficient prime divisors"
-
 """
 At this point we have completed the prime generate and can run a few
 tests.
