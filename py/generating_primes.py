@@ -246,17 +246,18 @@ def _is_prime(candidate, prime_divisors):
     The candidate is prime if it is indivisible by any number
     less than or equal to its square root"""
     
-    # We should not run out of prime divisors to test for primality
-    assert candidate == 2 or prime_divisors[-1] ** 2 >= candidate
+    # We should provide prime divisors for any candidate
+    # that is not the first prime number
+    num_divisors = len(prime_divisors)
+    assert candidate == 2 or num_divisors > 0
 
     if candidate == 2:
         return True
 
-
     sqrt_candidate = math.sqrt(candidate)
     index = 0
         
-    while prime_divisors[index] <= sqrt_candidate:
+    while index < num_divisors and prime_divisors[index] <= sqrt_candidate:
         rem = candidate % prime_divisors[index]
         if rem == 0:
             return False
@@ -276,7 +277,10 @@ except AssertionError:
 else:
     assert False, "Did not detect insufficient prime divisors"
 
-
+"""
+At this point we have completed the prime generate and can run a few
+tests.
+"""
 assert list(generate_primes(1)) == []
 assert list(generate_primes(2)) == [2]
 assert list(generate_primes(10)) == [2, 3, 5, 7]
