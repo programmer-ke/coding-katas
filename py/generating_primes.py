@@ -299,4 +299,5 @@ calculate its square root. This adds to the computation complexity of
 testing each candidate.
 
 ... (plimsq)
+todo: modify sieve to yield
 """
