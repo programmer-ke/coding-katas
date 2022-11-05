@@ -277,3 +277,26 @@ tests.
 assert list(generate_primes(1)) == []
 assert list(generate_primes(2)) == [2]
 assert list(generate_primes(10)) == [2, 3, 5, 7]
+
+"""
+Comparing the two mechanisms we have so far on generating prime numbers,
+I find on my machine that the sieve of eratosthenes is faster than
+the latest approach.
+
+>>> import timeit
+>>> timeit.timeit('sieve_of_eratosthenes(1000)', globals=globals(), number=100000)
+104.59253772700322
+>>> timeit.timeit('list(generate_primes(1000))', globals=globals(), number=100000)
+169.75383482599864
+
+The problem with the sieve of eratosthenes is that the prime
+candidates list grows proportionally with n, and for large values of
+n, we run out of space.
+
+We can therefore explore ways of optimizing our latest approach. We
+notice that whenever we're testing a candidate for primality, we
+calculate its square root. This adds to the computation complexity of
+testing each candidate.
+
+... (plimsq)
+"""
