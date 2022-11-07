@@ -80,7 +80,9 @@ def sieve_of_eratosthenes(n):
 
         prev = prime
 
-    return [i+1 for i in range(n) if is_prime_list[i]]
+    for i, is_prime in enumerate(is_prime_list):
+        if is_prime:
+            yield i+1
     
 
 def _mark_not_prime(is_prime_list, num):
@@ -98,9 +100,9 @@ def _get_next_prime(is_prime_list, prev):
             return i+1
     return None  # made explicit
 
-assert sieve_of_eratosthenes(1) == []
-assert sieve_of_eratosthenes(2) == [2]
-assert sieve_of_eratosthenes(10) == [2, 3, 5, 7]
+assert list(sieve_of_eratosthenes(1)) == []
+assert list(sieve_of_eratosthenes(2)) == [2]
+assert list(sieve_of_eratosthenes(10)) == [2, 3, 5, 7]
 
 
 """
@@ -243,7 +245,7 @@ import math
 def _is_prime(candidate, prime_divisors):
     """Returns a boolean indicating whether the candidate is prime
 
-    The candidate is prime if it is indivisible by any number
+    The candidate is prime if it is indivisible by any prime number
     less than or equal to its square root"""
     
     # We should provide prime divisors for any candidate
@@ -284,7 +286,7 @@ I find on my machine that the sieve of eratosthenes is faster than
 the latest approach.
 
 >>> import timeit
->>> timeit.timeit('sieve_of_eratosthenes(1000)', globals=globals(), number=100000)
+>>> timeit.timeit('list(sieve_of_eratosthenes(1000))', globals=globals(), number=100000)
 104.59253772700322
 >>> timeit.timeit('list(generate_primes(1000))', globals=globals(), number=100000)
 169.75383482599864
@@ -299,5 +301,91 @@ calculate its square root. This adds to the computation complexity of
 testing each candidate.
 
 ... (plimsq)
-todo: modify sieve to yield
+Since we only need to test a candidate with prime number less than or
+equal to it's square root, we notice the following relationship between
+the range of values for the candidate and the maximum prime number we
+need to test with.
+
+candidates   | max prime tester
+-------------------------------
+2..4         | 2
+5..9         | 3
+10..25       | 5
+26..49       | 7
+
+Therefore, starting with maximum prime tester as 2, we only advance it
+to the 3 if the candidate exceeds sq(2), and likewise to 5 if it
+exceeds sq(3) etc..
+
+We can then replace the square root with a check that conditionally
+advances our max prime tester in the primes list based on the value of
+the candidate.
+
+We'll modify the parent function slightly to maintain state of the
+current index of the max prime tester, incrementing it if necessary,
+and passing it to the prime tester helper function.
+
+We'll also only call the prime tester function with values greater than
+2, to reduce the amount of book-keeping we need to do.
 """
+
+def generate_primes(n):
+    """Return all primes less than or equal to n
+
+    All prime numbers upto n are indivisible by all
+    prime numbers <= sqrt(n)
+    """
+
+    assert n > 0
+
+    prime_testers = [2]
+    max_tester_index = 0
+
+    for prime_candidate in _generate_prime_candidates(maxnum=n):
+
+        if prime_candidate == 2: yield prime_candidate
+        
+        if prime_candidate > prime_testers[max_tester_index] ** 2:
+            max_tester_index += 1
+
+        if _is_prime(prime_candidate, prime_testers, max_tester_index):
+            yield prime_candidate
+
+            if prime_candidate ** 2 <= n:
+                prime_testers.append(prime_candidate)
+
+"""
+We then modify the prime tester function to make use of the max tester
+index. 
+"""
+
+def _is_prime(candidate, prime_divisors, max_tester_index):
+    """Returns a boolean indicating whether the candidate is prime
+
+    The candidate is prime if it is indivisible by any prime number
+    less than or equal to its square root
+
+    max_tester_index will indicate where this prime number is in
+    the prime_divisors list"""
+    
+    # We should provide prime divisors for any candidate
+    # that is not the first prime number
+    num_divisors = len(prime_divisors)
+    assert candidate == 2 or num_divisors > 0
+
+    if candidate == 2:
+        return True
+
+    sqrt_candidate = math.sqrt(candidate)
+    index = 0
+        
+    while index < num_divisors and prime_divisors[index] <= sqrt_candidate:
+        rem = candidate % prime_divisors[index]
+        if rem == 0:
+            return False
+        index += 1
+
+    return True
+
+
+# todo: fix max tester logic
