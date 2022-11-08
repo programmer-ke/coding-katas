@@ -113,7 +113,7 @@ of O(n), whereas the final list of primes is much smaller.
 
 For example, on my machine, when n is set to 1e10 (10 to the power 10),
 the function above throws a MemoryError exception. When set to a 10th
-of that, i.e. 1e9, the function uses 7.4 GB of memory whereas the
+of that, i.e. 1e9, the function uses upto 9.3 GB of memory whereas the
 resulting list of primes takes up 424 MB.
 
 We also notice with the above algorithm that some numbers will be
@@ -151,15 +151,15 @@ def generate_primes(n):
 
     assert n > 0
 
-    prime_testers = []
+    prime_divisors = []
 
     for prime_candidate in _generate_prime_candidates(maxnum=n):
 
-        if _is_prime(prime_candidate, prime_testers):
+        if _is_prime(prime_candidate, prime_divisors):
             yield prime_candidate
 
             if prime_candidate ** 2 <= n:
-                prime_testers.append(prime_candidate)
+                prime_divisors.append(prime_candidate)
 
 """
 When generating candidates for testing for primality, we already know
@@ -219,7 +219,7 @@ def _generate_prime_candidates(maxnum):
     assert maxnum > 0
 
     if maxnum == 1:
-        return []
+        return
     if maxnum >= 2:
         yield 2
     if maxnum >= 3:
@@ -287,9 +287,9 @@ the latest approach.
 
 >>> import timeit
 >>> timeit.timeit('list(sieve_of_eratosthenes(1000))', globals=globals(), number=100000)
-104.59253772700322
+22.939334203023463
 >>> timeit.timeit('list(generate_primes(1000))', globals=globals(), number=100000)
-169.75383482599864
+36.48710364702856
 
 The problem with the sieve of eratosthenes is that the prime
 candidates list grows proportionally with n, and for large values of
@@ -303,30 +303,31 @@ testing each candidate.
 ... (plimsq)
 Since we only need to test a candidate with prime number less than or
 equal to it's square root, we notice the following relationship between
-the range of values for the candidate and the maximum prime number we
-need to test with.
+the range of values for the candidate and the prime number divisors
+needed to determine primality.
 
-candidates   | max prime tester
+candidate x  | prime divisors
 -------------------------------
-2..4         | 2
-5..9         | 3
-10..25       | 5
-26..49       | 7
+3<=x<9       | 2
+9<=x<24      | 2, 3
+25<=x<49     | 2, 3, 5
+49<=x<121    | 2, 3, 5, 7
 
-Therefore, starting with maximum prime tester as 2, we only advance it
-to the 3 if the candidate exceeds sq(2), and likewise to 5 if it
-exceeds sq(3) etc..
+Therefore, starting with maximum prime divisor as 2, we only advance
+it to the 3 if the candidate equals or exceeds the square of 3, then
+advance it to 5 if the candidate equals or exceeds the square of 5 and
+so forth.
 
 We can then replace the square root with a check that conditionally
-advances our max prime tester in the primes list based on the value of
-the candidate.
+advances our max prime divisor in the primes divisors list based on
+the value of the candidate.
 
 We'll modify the parent function slightly to maintain state of the
-current index of the max prime tester, incrementing it if necessary,
+current index of the max prime divisor, incrementing it as necessary,
 and passing it to the prime tester helper function.
 
-We'll also only call the prime tester function with values greater than
-2, to reduce the amount of book-keeping we need to do.
+We'll also only call the prime tester function with values greater
+than 2, to reduce the amount of book-keeping we need to do.
 """
 
 def generate_primes(n):
@@ -338,54 +339,66 @@ def generate_primes(n):
 
     assert n > 0
 
-    prime_testers = [2]
-    max_tester_index = 0
+    prime_divisors, num_divisors = [2], 1
+    max_div_index, div_candidate_lim = 0, 9
 
     for prime_candidate in _generate_prime_candidates(maxnum=n):
 
         if prime_candidate == 2: yield prime_candidate
         
-        if prime_candidate > prime_testers[max_tester_index] ** 2:
-            max_tester_index += 1
+        if prime_candidate >= div_candidate_lim and max_div_index + 1 < num_divisors:
+            # Include next prime divisor in testing
+            max_div_index += 1
 
-        if _is_prime(prime_candidate, prime_testers, max_tester_index):
+            if max_div_index + 1 < num_divisors:
+                # Set the next upper limit for candidate with current prime divisors
+                div_candidate_lim = prime_divisors[max_div_index + 1] ** 2
+
+        if _is_prime(prime_candidate, prime_divisors, max_div_index, num_divisors):
             yield prime_candidate
 
             if prime_candidate ** 2 <= n:
-                prime_testers.append(prime_candidate)
+                prime_divisors.append(prime_candidate)
+                num_divisors += 1
 
 """
 We then modify the prime tester function to make use of the max tester
 index. 
 """
 
-def _is_prime(candidate, prime_divisors, max_tester_index):
+def _is_prime(candidate, prime_divisors, max_div_index, num_divisors):
     """Returns a boolean indicating whether the candidate is prime
 
-    The candidate is prime if it is indivisible by any prime number
-    less than or equal to its square root
+    The candidate  is prime if it  is indivisible by any the prime
+    divisors less than or equal to its square root
 
     max_tester_index will indicate where this prime number is in
     the prime_divisors list"""
     
-    # We should provide prime divisors for any candidate
-    # that is not the first prime number
-    num_divisors = len(prime_divisors)
-    assert candidate == 2 or num_divisors > 0
+    try:
+        assert num_divisors > max_div_index
+    except AssertionError as e:
+        print(num_divisors, max_div_index)
+        raise e
 
-    if candidate == 2:
-        return True
-
-    sqrt_candidate = math.sqrt(candidate)
     index = 0
         
-    while index < num_divisors and prime_divisors[index] <= sqrt_candidate:
-        rem = candidate % prime_divisors[index]
+    for i in range(max_div_index + 1):
+        rem = candidate % prime_divisors[i]
         if rem == 0:
             return False
-        index += 1
 
     return True
 
+assert list(generate_primes(1)) == []
+assert list(generate_primes(2)) == [2]
+assert list(generate_primes(10)) == [2, 3, 5, 7]
+assert list(generate_primes(25)) == [2, 3, 5, 7, 11, 13, 17, 19, 23]
+assert list(generate_primes(1000)) == list(sieve_of_eratosthenes(1000))
 
-# todo: fix max tester logic
+"""
+# todo: note on len(prime_divisors)
+
+>>> timeit.timeit('list(generate_primes(1000))', globals=globals(), number=100000)
+27.289080993970856
+"""
