@@ -7,6 +7,7 @@ approach to identify a prime number is to test if it is divisible by
 any number between one and itself.
 """
 
+
 def is_prime(num):
     assert num > 1
 
@@ -22,6 +23,7 @@ def test_is_prime(is_prime_func):
     assert is_prime_func(15) == False
     assert is_prime_func(103) == True
     assert is_prime_func(1000) == False
+
 
 test_is_prime(is_prime)
 
@@ -53,6 +55,7 @@ onwards, because it is guaranteed that any multiples less than the
 square of the prime have been cancelled out
 """
 
+
 def sieve_of_eratosthenes(n):
     """Return primes less than or equal to n
 
@@ -82,8 +85,8 @@ def sieve_of_eratosthenes(n):
 
     for i, is_prime in enumerate(is_prime_list):
         if is_prime:
-            yield i+1
-    
+            yield i + 1
+
 
 def _mark_not_prime(is_prime_list, num):
     is_prime_list[num - 1] = False
@@ -97,8 +100,9 @@ def _get_next_prime(is_prime_list, prev):
 
     for i in range(prev, len(is_prime_list)):
         if is_prime_list[i] == True:
-            return i+1
+            return i + 1
     return None  # made explicit
+
 
 assert list(sieve_of_eratosthenes(1)) == []
 assert list(sieve_of_eratosthenes(2)) == [2]
@@ -142,6 +146,7 @@ for primality, discarding non-primes and retaining only the primes.
 An overall algorithm would be like follows.
 """
 
+
 def generate_primes(n):
     """Return all primes less than or equal to n
 
@@ -158,8 +163,9 @@ def generate_primes(n):
         if _is_prime(prime_candidate, prime_divisors):
             yield prime_candidate
 
-            if prime_candidate ** 2 <= n:
+            if prime_candidate**2 <= n:
                 prime_divisors.append(prime_candidate)
+
 
 """
 When generating candidates for testing for primality, we already know
@@ -212,6 +218,7 @@ for prime numbers eliminating multiples of 2 and 3. This reduces the
 number of primality checks we need to perform by more than a half.
 """
 
+
 def _generate_prime_candidates(maxnum):
     """Generates a sequence of number to test for primality
 
@@ -233,6 +240,7 @@ def _generate_prime_candidates(maxnum):
         candidate += dx
         dx = 6 - dx
 
+
 assert list(_generate_prime_candidates(1)) == []
 assert list(_generate_prime_candidates(20)) == [2, 3, 5, 7, 11, 13, 17, 19]
 
@@ -242,12 +250,13 @@ is a prime number.
 """
 import math
 
+
 def _is_prime(candidate, prime_divisors):
     """Returns a boolean indicating whether the candidate is prime
 
     The candidate is prime if it is indivisible by any prime number
     less than or equal to its square root"""
-    
+
     # We should provide prime divisors for any candidate
     # that is not the first prime number
     num_divisors = len(prime_divisors)
@@ -258,7 +267,7 @@ def _is_prime(candidate, prime_divisors):
 
     sqrt_candidate = math.sqrt(candidate)
     index = 0
-        
+
     while index < num_divisors and prime_divisors[index] <= sqrt_candidate:
         rem = candidate % prime_divisors[index]
         if rem == 0:
@@ -295,12 +304,11 @@ The problem with the sieve of eratosthenes is that the prime
 candidates list grows proportionally with n, and for large values of
 n, we run out of space.
 
-We can therefore explore ways of optimizing our latest approach. We
+We can next explore ways of optimizing our latest approach. We
 notice that whenever we're testing a candidate for primality, we
 calculate its square root. This adds to the computation complexity of
 testing each candidate.
 
-... (plimsq)
 Since we only need to test a candidate with prime number less than or
 equal to it's square root, we notice the following relationship between
 the range of values for the candidate and the prime number divisors
@@ -318,77 +326,88 @@ it to the 3 if the candidate equals or exceeds the square of 3, then
 advance it to 5 if the candidate equals or exceeds the square of 5 and
 so forth.
 
-We can then replace the square root with a check that conditionally
-advances our max prime divisor in the primes divisors list based on
-the value of the candidate.
+We can then replace the square root calculation with a check that
+conditionally advances our max prime divisor in the divisors list
+based on the value of the candidate.
 
 We'll modify the parent function slightly to maintain state of the
 current index of the max prime divisor, incrementing it as necessary,
 and passing it to the prime tester helper function.
 
-We'll also only call the prime tester function with values greater
-than 2, to reduce the amount of book-keeping we need to do.
+Another optimization would be to avoid calculating the length of the
+prime divisors list every time we test a candidate for primality.
+We'll do this by using a variable to keep track of how many divisors
+we have within every loop
 """
+
 
 def generate_primes(n):
     """Return all primes less than or equal to n
 
     All prime numbers upto n are indivisible by all
     prime numbers <= sqrt(n)
+
+    We treat 2 as a special case since it's the first prime number.
+    It is our initial prime divisor.
     """
 
     assert n > 0
 
     prime_divisors, num_divisors = [2], 1
-    max_div_index, div_candidate_lim = 0, 9
+    max_divisor_index, divisors_upper_limit = 0, 9
 
     for prime_candidate in _generate_prime_candidates(maxnum=n):
 
-        if prime_candidate == 2: yield prime_candidate
-        
-        if prime_candidate >= div_candidate_lim and max_div_index + 1 < num_divisors:
-            # Include next prime divisor in testing
-            max_div_index += 1
-
-            if max_div_index + 1 < num_divisors:
-                # Set the next upper limit for candidate with current prime divisors
-                div_candidate_lim = prime_divisors[max_div_index + 1] ** 2
-
-        if _is_prime(prime_candidate, prime_divisors, max_div_index, num_divisors):
+        if prime_candidate == 2:
             yield prime_candidate
 
-            if prime_candidate ** 2 <= n:
+        if (
+            prime_candidate >= divisors_upper_limit
+            and max_divisor_index + 1 < num_divisors
+        ):
+            # Include next prime divisor in testing
+            max_divisor_index += 1
+
+            if max_divisor_index + 1 < num_divisors:
+                # Set the next upper limit for candidate with current prime divisors
+                divisors_upper_limit = (
+                    prime_divisors[max_divisor_index + 1] ** 2
+                )
+
+        if _is_prime(
+            prime_candidate, prime_divisors, max_divisor_index, num_divisors
+        ):
+            yield prime_candidate
+
+            if prime_candidate**2 <= n:
                 prime_divisors.append(prime_candidate)
                 num_divisors += 1
 
+
 """
-We then modify the prime tester function to make use of the max tester
-index. 
+We then modify the prime tester function to make use of the maximum divisor
+index instead of square root of candidate.
 """
 
-def _is_prime(candidate, prime_divisors, max_div_index, num_divisors):
+
+def _is_prime(candidate, prime_divisors, max_divisor_index, num_divisors):
     """Returns a boolean indicating whether the candidate is prime
 
     The candidate  is prime if it  is indivisible by any the prime
     divisors less than or equal to its square root
 
-    max_tester_index will indicate where this prime number is in
+    max_divisor_index will indicate where this prime number is in
     the prime_divisors list"""
-    
-    try:
-        assert num_divisors > max_div_index
-    except AssertionError as e:
-        print(num_divisors, max_div_index)
-        raise e
 
-    index = 0
-        
-    for i in range(max_div_index + 1):
+    assert num_divisors > max_divisor_index
+
+    for i in range(max_divisor_index + 1):
         rem = candidate % prime_divisors[i]
         if rem == 0:
             return False
 
     return True
+
 
 assert list(generate_primes(1)) == []
 assert list(generate_primes(2)) == [2]
@@ -397,8 +416,39 @@ assert list(generate_primes(25)) == [2, 3, 5, 7, 11, 13, 17, 19, 23]
 assert list(generate_primes(1000)) == list(sieve_of_eratosthenes(1000))
 
 """
-# todo: note on len(prime_divisors)
+This version shows an improvement over the previous version, though still
+performs worse than the sieve of eratosthenes.
+
 
 >>> timeit.timeit('list(generate_primes(1000))', globals=globals(), number=100000)
 27.289080993970856
+
+One potentially expensive operation being performed per prime
+candidate is the modulus operation, which is basically a division
+operation. Division is an expensive operation and so eliminating this
+can improve the performance characteristics of the algorithm.
+
+A clue we can get from the sieve of eratosthenes is that we only need
+to eliminate multiples of all primes <= sqrt(n) when generating all
+primes <= n.
+
+To avoid the excessive cost of space associated with the sieve algo,
+once we determine that a number is not prime, we can discard it.
+
+Inspired by the sieve, we can decide to only retain any discovered
+prime numbers, and as we generate candidates <= n, keep track multiples
+of the prime numbers that we can use to test against the candidate.
+
+If the candidate is a multiple of any of the relevant prime numbers,
+we discard it and move on to the next candidate. Otherwise, we add it
+to the list of prime numbers.
+
+Compared to the sieve algorithm, we use significantly less storage as
+all non-primes are discarded. Compared to our latest implementation,
+we incur and additional cost of space: multiples of primes to be tested
+against the candidate, but this is at the benefit of avoiding expensive
+division operations.
+
+...
+todo: implement this approach
 """
