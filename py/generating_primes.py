@@ -446,8 +446,8 @@ to the list of prime numbers.
 Compared to the sieve algorithm, we use significantly less storage as
 all non-primes are discarded. Compared to our latest implementation,
 we incur and additional cost of space: multiples of primes to be tested
-against the candidate, but this is at the benefit of avoiding expensive
-division operations.
+against the candidate, but this is with the benefit of avoiding
+expensive division operations.
 
 ...
 todo: implement this approach
