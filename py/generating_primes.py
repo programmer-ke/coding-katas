@@ -296,9 +296,9 @@ the latest approach.
 
 >>> import timeit
 >>> timeit.timeit('list(sieve_of_eratosthenes(1000))', globals=globals(), number=100000)
-22.939334203023463
+149.16681294699993
 >>> timeit.timeit('list(generate_primes(1000))', globals=globals(), number=100000)
-36.48710364702856
+240.42848851499912
 
 The problem with the sieve of eratosthenes is that the prime
 candidates list grows proportionally with n, and for large values of
@@ -422,7 +422,7 @@ performs worse than the sieve of eratosthenes.
 
 
 >>> timeit.timeit('list(generate_primes(1000))', globals=globals(), number=100000)
-27.289080993970856
+173.12115182099842
 
 One potentially expensive operation being performed per prime
 candidate is the modulus operation, which is in essence a division
@@ -532,10 +532,12 @@ def _is_prime(candidate, prime_testers, prime_multiples, max_tester_index, num_d
         raise AssertionError(msg)
 
     # test for primality
-    for i in range(max_tester_index + 1):
+    for i in range(1, max_tester_index + 1):
 
         while prime_multiples[i] < candidate:
-            prime_multiples[i] += prime_testers[i]
+            # increment by prime number doubled to skip
+            # multiples of 2
+            prime_multiples[i] += prime_testers[i] * 2
 
         if prime_multiples[i] == candidate:
             return False
@@ -548,3 +550,12 @@ assert list(generate_primes(2)) == [2]
 assert list(generate_primes(10)) == [2, 3, 5, 7]
 assert list(generate_primes(25)) == [2, 3, 5, 7, 11, 13, 17, 19, 23]
 assert list(generate_primes(1000)) == list(sieve_of_eratosthenes(1000))
+
+
+"""
+>>> timeit.timeit('list(generate_primes(1000))', globals=globals(), number=100000)
+242.43458445999931
+
+todo: eliminate all unnecessary work, make as tight as possible
+todo: redo benchmarks
+"""
