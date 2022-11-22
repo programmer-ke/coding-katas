@@ -557,5 +557,6 @@ assert list(generate_primes(1000)) == list(sieve_of_eratosthenes(1000))
 242.43458445999931
 
 todo: eliminate all unnecessary work, make as tight as possible
+  e.g. do not test multiples of 2 and 3
 todo: redo benchmarks
 """
