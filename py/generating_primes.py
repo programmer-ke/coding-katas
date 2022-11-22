@@ -317,7 +317,7 @@ needed to determine primality.
 candidate x  | prime divisors
 -------------------------------
 3<=x<9       | 2
-9<=x<24      | 2, 3
+9<=x<25      | 2, 3
 25<=x<49     | 2, 3, 5
 49<=x<121    | 2, 3, 5, 7
 
@@ -354,15 +354,16 @@ def generate_primes(n):
     assert n > 0
 
     prime_divisors, num_divisors = [2], 1
-    max_divisor_index, divisors_upper_limit = 0, 9
+    max_divisor_index, divisors_candidate_limit = 0, 9
 
     for prime_candidate in _generate_prime_candidates(maxnum=n):
 
         if prime_candidate == 2:
             yield prime_candidate
+            continue
 
         if (
-            prime_candidate >= divisors_upper_limit
+            prime_candidate >= divisors_candidate_limit
             and max_divisor_index + 1 < num_divisors
         ):
             # Include next prime divisor in testing
@@ -370,7 +371,7 @@ def generate_primes(n):
 
             if max_divisor_index + 1 < num_divisors:
                 # Set the next upper limit for candidate with current prime divisors
-                divisors_upper_limit = (
+                divisors_candidate_limit = (
                     prime_divisors[max_divisor_index + 1] ** 2
                 )
 
@@ -396,8 +397,8 @@ def _is_prime(candidate, prime_divisors, max_divisor_index, num_divisors):
     The candidate  is prime if it  is indivisible by any the prime
     divisors less than or equal to its square root
 
-    max_divisor_index will indicate where this prime number is in
-    the prime_divisors list"""
+    max_divisor_index will indicate where the max prime number used
+    for testing is in the prime_divisors list"""
 
     assert num_divisors > max_divisor_index
 
@@ -424,7 +425,7 @@ performs worse than the sieve of eratosthenes.
 27.289080993970856
 
 One potentially expensive operation being performed per prime
-candidate is the modulus operation, which is basically a division
+candidate is the modulus operation, which is in essence a division
 operation. Division is an expensive operation and so eliminating this
 can improve the performance characteristics of the algorithm.
 
@@ -436,7 +437,7 @@ To avoid the excessive cost of space associated with the sieve algo,
 once we determine that a number is not prime, we can discard it.
 
 Inspired by the sieve, we can decide to only retain any discovered
-prime numbers, and as we generate candidates <= n, keep track multiples
+prime numbers, and as we generate candidates <= n, keep track of multiples
 of the prime numbers that we can use to test against the candidate.
 
 If the candidate is a multiple of any of the relevant prime numbers,
@@ -445,10 +446,105 @@ to the list of prime numbers.
 
 Compared to the sieve algorithm, we use significantly less storage as
 all non-primes are discarded. Compared to our latest implementation,
-we incur and additional cost of space: multiples of primes to be tested
+we incur an additional cost of space: multiples of primes to be tested
 against the candidate, but this is with the benefit of avoiding
 expensive division operations.
 
-...
-todo: implement this approach
+The following table shows, for each range of candidate x, the prime
+testers used, and their corresponding multiples. We notice that for
+each prime divisor, its starting multiple used for prime number
+testing is its square.
+
+
+candidate x  | prime testers  | corresponding multiples
+-------------------------------------------------------
+3<=x<9       | 2              | 4+
+9<=x<25      | 2, 3           | 10+, 9+
+25<=x<49     | 2, 3, 5        | 26+, 27+, 25+
+49<=x<121    | 2, 3, 5, 7     | 40+, 51+, 50+, 49+
 """
+
+def generate_primes(n):
+    """Return all primes less than or equal to n
+
+    All prime numbers upto n are indivisible by all
+    prime numbers <= sqrt(n)
+
+    We treat 2 as a special case since it's the first prime number.
+    It is our initial prime divisor.
+    """
+
+    assert n > 0
+
+    prime_testers, num_testers = [2], 1
+    max_tester_index, testers_candidate_limit = 0, 9
+    prime_multiples = [prime_testers[max_tester_index]**2]
+
+    for prime_candidate in _generate_prime_candidates(maxnum=n):
+
+        if prime_candidate == 2:
+            yield prime_candidate
+            continue
+
+        if (
+            prime_candidate >= testers_candidate_limit
+            and max_tester_index + 1 < num_testers
+        ):
+            # Include next prime tester in testing
+            max_tester_index += 1
+            prime_multiples.append(prime_testers[max_tester_index]**2)
+
+            if max_tester_index + 1 < num_testers:
+                # Set the next upper limit for candidate with current prime testers
+                testers_candidate_limit = (
+                    prime_testers[max_tester_index + 1] ** 2
+                )
+
+        if _is_prime(
+            prime_candidate, prime_testers, prime_multiples, max_tester_index, num_testers
+        ):
+            yield prime_candidate
+
+            if prime_candidate**2 <= n:
+                prime_testers.append(prime_candidate)
+                num_testers += 1
+
+
+def _is_prime(candidate, prime_testers, prime_multiples, max_tester_index, num_divisors):
+    """Returns a boolean indicating whether the candidate is prime
+
+    The candidate  is prime if it  is indivisible by any the prime
+    numbers less than or equal to its square root.
+    
+    We determine this by checking that the candidate is not equal
+    to any multiples of these prime numbers.
+
+    max_tester_index will indicate the where the max prime number we
+    use for testing is in the prime_testers list"""
+
+    # validate input
+    assert candidate > 1
+    assert num_divisors > max_tester_index
+    try:
+        prime_multiples[max_tester_index]
+    except IndexError:
+        msg = "Number of multiples is less than number of prime testers"
+        raise AssertionError(msg)
+
+    # test for primality
+    for i in range(max_tester_index + 1):
+
+        while prime_multiples[i] < candidate:
+            prime_multiples[i] += prime_testers[i]
+
+        if prime_multiples[i] == candidate:
+            return False
+
+    return True
+
+
+assert list(generate_primes(1)) == []
+assert list(generate_primes(2)) == [2]
+assert list(generate_primes(10)) == [2, 3, 5, 7]
+assert list(generate_primes(25)) == [2, 3, 5, 7, 11, 13, 17, 19, 23]
+assert list(generate_primes(1000)) == list(sieve_of_eratosthenes(1000))
