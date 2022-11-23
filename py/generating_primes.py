@@ -29,7 +29,7 @@ test_is_prime(is_prime)
 
 """
 For a large number m, less than or equal to n, we'll be doing
-almost m checks to identify if it is a prime number. Also, we'll have
+almost m checks to identify if it is a prime number. We'll also have
 to do this for all numbers from 2 to n.
 
 Two avenues of improving over this are to either decrease the numbers
@@ -49,10 +49,7 @@ the remaining numbers are primes less than or equal to 30.
 This algorithm is known as the Sieve of Eratosthenes:
 https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes
 
-An implementation of it follows. An optimization we'll make is to
-only cancel out multiples of each prime from the square of the prime
-onwards, because it is guaranteed that any multiples less than the
-square of the prime have been cancelled out
+An implementation of it follows.
 """
 
 
@@ -71,6 +68,8 @@ def sieve_of_eratosthenes(n):
 
     while True:
         prime = _get_next_prime(is_prime_list, prev)
+        # An optimization possible here is that we only need to cancel
+        # multiples starting from the square of the prime number
         multiple = None if prime is None else prime**2
 
         if multiple is None or multiple > n:
@@ -145,7 +144,7 @@ for primality, discarding non-primes and retaining only the primes.
 
 An overall algorithm would be like follows.
 """
-
+import math
 
 def generate_primes(n):
     """Return all primes less than or equal to n
@@ -157,13 +156,14 @@ def generate_primes(n):
     assert n > 0
 
     prime_divisors = []
+    sqrt_n = math.sqrt(n)
 
     for prime_candidate in _generate_prime_candidates(maxnum=n):
 
         if _is_prime(prime_candidate, prime_divisors):
             yield prime_candidate
 
-            if prime_candidate**2 <= n:
+            if prime_candidate <= sqrt_n:
                 prime_divisors.append(prime_candidate)
 
 
@@ -248,7 +248,6 @@ assert list(_generate_prime_candidates(20)) == [2, 3, 5, 7, 11, 13, 17, 19]
 Final piece of this approach is to determine whether a prime candidate
 is a prime number.
 """
-import math
 
 
 def _is_prime(candidate, prime_divisors):
@@ -296,15 +295,15 @@ the latest approach.
 
 >>> import timeit
 >>> timeit.timeit('list(sieve_of_eratosthenes(1000))', globals=globals(), number=100000)
-149.16681294699993
+22.177938275999622
 >>> timeit.timeit('list(generate_primes(1000))', globals=globals(), number=100000)
-240.42848851499912
+33.055020915999194
 
 The problem with the sieve of eratosthenes is that the prime
 candidates list grows proportionally with n, and for large values of
 n, we run out of space.
 
-We can next explore ways of optimizing our latest approach. We
+We next explore ways of optimizing our latest approach. We
 notice that whenever we're testing a candidate for primality, we
 calculate its square root. This adds to the computation complexity of
 testing each candidate.
@@ -338,6 +337,15 @@ Another optimization would be to avoid calculating the length of the
 prime divisors list every time we test a candidate for primality.
 We'll do this by using a variable to keep track of how many divisors
 we have within every loop
+
+Other optimizations we'll make:
+- Avoid calculcating length of prime divisors list every time we
+  test a candidate for primality, and instead use a variable to
+  keep track of the length
+- Avoid using 2 and 3 as prime divisors because our generator
+  already skips their multiples. This means that we'll start
+  with 5 as our initial divisor and 49 as threshold for adding
+  the next prime as a divisor
 """
 
 
@@ -346,19 +354,17 @@ def generate_primes(n):
 
     All prime numbers upto n are indivisible by all
     prime numbers <= sqrt(n)
-
-    We treat 2 as a special case since it's the first prime number.
-    It is our initial prime divisor.
     """
 
     assert n > 0
 
-    prime_divisors, num_divisors = [2], 1
-    max_divisor_index, divisors_candidate_limit = 0, 9
+    prime_divisors, num_divisors =[5], 1
+    max_divisor_index, divisors_candidate_limit = 0, 49
+    sqrt_n = math.sqrt(n)
 
     for prime_candidate in _generate_prime_candidates(maxnum=n):
 
-        if prime_candidate == 2:
+        if prime_candidate in (2, 3, 5):
             yield prime_candidate
             continue
 
@@ -380,7 +386,7 @@ def generate_primes(n):
         ):
             yield prime_candidate
 
-            if prime_candidate**2 <= n:
+            if prime_candidate <= sqrt_n:
                 prime_divisors.append(prime_candidate)
                 num_divisors += 1
 
@@ -417,12 +423,13 @@ assert list(generate_primes(25)) == [2, 3, 5, 7, 11, 13, 17, 19, 23]
 assert list(generate_primes(1000)) == list(sieve_of_eratosthenes(1000))
 
 """
-This version shows an improvement over the previous version, though still
-performs worse than the sieve of eratosthenes.
+This version shows an improved performance over the previous
+algorithms for generating primes
 
-
+>>> timeit.timeit('list(sieve_of_eratosthenes(1000))', globals=globals(), number=100000)
+22.317627714997798
 >>> timeit.timeit('list(generate_primes(1000))', globals=globals(), number=100000)
-173.12115182099842
+21.558164017995296
 
 One potentially expensive operation being performed per prime
 candidate is the modulus operation, which is in essence a division
@@ -436,8 +443,8 @@ primes <= n.
 To avoid the excessive cost of space associated with the sieve algo,
 once we determine that a number is not prime, we can discard it.
 
-Inspired by the sieve, we can decide to only retain any discovered
-prime numbers, and as we generate candidates <= n, keep track of multiples
+Inspired by the sieve, we can decide to discard any discovered
+non-primes, and as we generate candidates <= n, keep track of multiples
 of the prime numbers that we can use to test against the candidate.
 
 If the candidate is a multiple of any of the relevant prime numbers,
@@ -462,6 +469,9 @@ candidate x  | prime testers  | corresponding multiples
 9<=x<25      | 2, 3           | 10+, 9+
 25<=x<49     | 2, 3, 5        | 26+, 27+, 25+
 49<=x<121    | 2, 3, 5, 7     | 40+, 51+, 50+, 49+
+
+Since our candidate generator does not generate multiples of 2
+and 3, we can eliminate these as prime testers.
 """
 
 def generate_primes(n):
@@ -469,20 +479,18 @@ def generate_primes(n):
 
     All prime numbers upto n are indivisible by all
     prime numbers <= sqrt(n)
-
-    We treat 2 as a special case since it's the first prime number.
-    It is our initial prime divisor.
     """
 
     assert n > 0
 
-    prime_testers, num_testers = [2], 1
-    max_tester_index, testers_candidate_limit = 0, 9
+    prime_testers, num_testers = [5], 1
+    max_tester_index, testers_candidate_limit = 0, 49
     prime_multiples = [prime_testers[max_tester_index]**2]
+    sqrt_n = math.sqrt(n)
 
     for prime_candidate in _generate_prime_candidates(maxnum=n):
 
-        if prime_candidate == 2:
+        if prime_candidate in (2, 3, 5):
             yield prime_candidate
             continue
 
@@ -505,7 +513,7 @@ def generate_primes(n):
         ):
             yield prime_candidate
 
-            if prime_candidate**2 <= n:
+            if prime_candidate <= sqrt_n:
                 prime_testers.append(prime_candidate)
                 num_testers += 1
 
@@ -532,7 +540,7 @@ def _is_prime(candidate, prime_testers, prime_multiples, max_tester_index, num_d
         raise AssertionError(msg)
 
     # test for primality
-    for i in range(1, max_tester_index + 1):
+    for i in range(max_tester_index + 1):
 
         while prime_multiples[i] < candidate:
             # increment by prime number doubled to skip
@@ -551,10 +559,12 @@ assert list(generate_primes(10)) == [2, 3, 5, 7]
 assert list(generate_primes(25)) == [2, 3, 5, 7, 11, 13, 17, 19, 23]
 assert list(generate_primes(1000)) == list(sieve_of_eratosthenes(1000))
 
-
 """
+
+>>> timeit.timeit('list(sieve_of_eratosthenes(1000))', globals=globals(), number=100000)
+22.40212686599989
 >>> timeit.timeit('list(generate_primes(1000))', globals=globals(), number=100000)
-242.43458445999931
+27.856392198998947
 
 todo: eliminate all unnecessary work, make as tight as possible
   e.g. do not test multiples of 2 and 3
