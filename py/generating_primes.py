@@ -423,8 +423,7 @@ assert list(generate_primes(25)) == [2, 3, 5, 7, 11, 13, 17, 19, 23]
 assert list(generate_primes(1000)) == list(sieve_of_eratosthenes(1000))
 
 """
-This version shows an improved performance over the previous
-algorithms for generating primes
+This version shows the best performance so far in generating primes.
 
 >>> timeit.timeit('list(sieve_of_eratosthenes(1000))', globals=globals(), number=100000)
 22.317627714997798
@@ -434,7 +433,9 @@ algorithms for generating primes
 One potentially expensive operation being performed per prime
 candidate is the modulus operation, which is in essence a division
 operation. Division is an expensive operation and so eliminating this
-can improve the performance characteristics of the algorithm.
+may possibly improve the performance of the algorithm.
+
+https://stackoverflow.com/q/15745819 (why is division more expensive than multiplicaton?)
 
 A clue we can get from the sieve of eratosthenes is that we only need
 to eliminate multiples of all primes <= sqrt(n) when generating all
@@ -560,13 +561,18 @@ assert list(generate_primes(25)) == [2, 3, 5, 7, 11, 13, 17, 19, 23]
 assert list(generate_primes(1000)) == list(sieve_of_eratosthenes(1000))
 
 """
-
 >>> timeit.timeit('list(sieve_of_eratosthenes(1000))', globals=globals(), number=100000)
 22.40212686599989
 >>> timeit.timeit('list(generate_primes(1000))', globals=globals(), number=100000)
 27.856392198998947
 
-todo: eliminate all unnecessary work, make as tight as possible
-  e.g. do not test multiples of 2 and 3
-todo: redo benchmarks
+This latest version compares unfavourably to the previous version.
+We can conclude that the time complexity of maintaining prime multiples
+to test prime candidates is greater than the modulus operation being
+performed per candidate. This may perhaps differ for different computer
+architectures that implement division in different ways.
+
+todo: Try a modified sieve
+- See wikipedia article
+- See https://stackoverflow.com/a/10733621/1382495
 """
