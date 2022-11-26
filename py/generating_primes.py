@@ -284,9 +284,15 @@ assert _is_prime(23, [2, 3, 5]) == True
 At this point we have completed the prime generate and can run a few
 tests.
 """
-assert list(generate_primes(1)) == []
-assert list(generate_primes(2)) == [2]
-assert list(generate_primes(10)) == [2, 3, 5, 7]
+def test_generating_primes(func):
+    assert list(func(1)) == []
+    assert list(func(2)) == [2]
+    assert list(func(7)) == [2, 3, 5, 7]
+    assert list(func(10)) == [2, 3, 5, 7]
+    assert list(func(25)) == [2, 3, 5, 7, 11, 13, 17, 19, 23]
+    assert list(func(1000)) == list(sieve_of_eratosthenes(1000))
+
+test_generating_primes(generate_primes)
 
 """
 Comparing the two mechanisms we have so far on generating prime numbers,
@@ -415,12 +421,7 @@ def _is_prime(candidate, prime_divisors, max_divisor_index, num_divisors):
 
     return True
 
-
-assert list(generate_primes(1)) == []
-assert list(generate_primes(2)) == [2]
-assert list(generate_primes(10)) == [2, 3, 5, 7]
-assert list(generate_primes(25)) == [2, 3, 5, 7, 11, 13, 17, 19, 23]
-assert list(generate_primes(1000)) == list(sieve_of_eratosthenes(1000))
+test_generating_primes(generate_primes)
 
 """
 This version shows the best performance so far in generating primes.
@@ -554,11 +555,7 @@ def _is_prime(candidate, prime_testers, prime_multiples, max_tester_index, num_d
     return True
 
 
-assert list(generate_primes(1)) == []
-assert list(generate_primes(2)) == [2]
-assert list(generate_primes(10)) == [2, 3, 5, 7]
-assert list(generate_primes(25)) == [2, 3, 5, 7, 11, 13, 17, 19, 23]
-assert list(generate_primes(1000)) == list(sieve_of_eratosthenes(1000))
+test_generating_primes(generate_primes)
 
 """
 >>> timeit.timeit('list(sieve_of_eratosthenes(1000))', globals=globals(), number=100000)
@@ -569,10 +566,48 @@ assert list(generate_primes(1000)) == list(sieve_of_eratosthenes(1000))
 This latest version compares unfavourably to the previous version.
 We can conclude that the time complexity of maintaining prime multiples
 to test prime candidates is greater than the modulus operation being
-performed per candidate. This may perhaps differ for different computer
-architectures that implement division in different ways.
+performed per candidate. This behaviour may be dependant on the
+particular computer architecture since division may be implemented in
+different ways.
 
 todo: Try a modified sieve
-- See wikipedia article
-- See https://stackoverflow.com/a/10733621/1382495
+- https://code.activestate.com/recipes/117119-sieve-of-eratosthenes/
+"""
+
+def eratosthenes1(n):
+    '''Yields the sequence of prime numbers via the Sieve of Eratosthenes.'''
+    D = {}  # map composite integers to primes witnessing their compositeness
+    q = 2   # first integer to test for primality
+    while not q > n:
+        if q not in D:
+            yield q        # not marked composite, must be prime
+            D[q*q] = [q]   # first multiple of q not already marked
+        else:
+            for p in D[q]: # move each witness to its next multiple
+                D.setdefault(p+q,[]).append(p)
+            del D[q]       # no longer need D[q], free memory
+        q += 1
+
+test_generating_primes(eratosthenes1)
+
+def eratosthenes2(n):
+    '''Yields the sequence of prime numbers via the Sieve of Eratosthenes.'''
+    D = {}  # map composite integers to primes witnessing their compositeness
+    q = 2   # first integer to test for primality
+
+    while not q > n:
+        p = D.pop(q, None)
+        if p:
+            x = p + q
+            while x in D: x += p
+            D[x] = p
+        else:
+            D[q*q] = q
+            yield q
+        q += 1
+
+test_generating_primes(eratosthenes2)
+
+"""
+todo: have a version for each, do proper benchmarking (see timeit documentation)
 """
