@@ -305,17 +305,24 @@ def test_generating_primes(func):
 
 test_generating_primes(generate_primes_v1)
 
+
+
 """
-Comparing the two mechanisms we have so far on generating prime numbers,
-I find on my machine that the sieve of eratosthenes is faster than
-the latest approach.
+Comparing the two mechanisms we have so far on generating prime
+numbers, I find on my machine that the sieve of eratosthenes
+(10.301812280999002 seconds) is faster than the latter approach
+(12.173762299000373 seconds).
+"""
 
->>> import timeit
->>> timeit.timeit('list(sieve_of_eratosthenes(1000))', globals=globals(), number=100000)
-22.177938275999622
->>> timeit.timeit('list(generate_primes_v1(1000))', globals=globals(), number=100000)
-33.055020915999194
+if __name__ == "__main__":
+    import timeit
+    no_iterations = 10000
+    print("timing sieve_of_eratosthenes")
+    print(min(timeit.Timer('list(sieve_of_eratosthenes(1000))', globals=globals()).repeat(5, no_iterations)))
+    print("timing generate_primes_v1")
+    print(min(timeit.Timer('list(generate_primes_v1(1000))', globals=globals()).repeat(5, no_iterations)))
 
+"""
 The problem with the sieve of eratosthenes is that the prime
 candidates list grows proportionally with n, and for large values of
 n, we run out of space.
@@ -421,14 +428,16 @@ def _is_prime(candidate, prime_divisors, max_divisor_index, num_divisors):
 
 test_generating_primes(generate_primes_v2)
 
+
 """
-This version shows the best performance so far in generating primes.
+This version shows the best performance so far in generating primes
+(9.851660360998721 seconds).
+"""
+if __name__ == "__main__":
+    print("timing generate_primes_v2")
+    print(min(timeit.Timer('list(generate_primes_v2(1000))', globals=globals()).repeat(5, no_iterations)))
 
->>> timeit.timeit('list(sieve_of_eratosthenes(1000))', globals=globals(), number=100000)
-22.317627714997798
->>> timeit.timeit('list(generate_primes_v2(1000))', globals=globals(), number=100000)
-21.558164017995296
-
+"""
 One potentially expensive operation being performed per prime
 candidate is the modulus operation, which is in essence a division
 operation. Division is an relatively expensive operation and so
@@ -560,18 +569,17 @@ def _is_prime(
 
 test_generating_primes(generate_primes_v3)
 
-"""
->>> timeit.timeit('list(sieve_of_eratosthenes(1000))', globals=globals(), number=100000)
-22.40212686599989
->>> timeit.timeit('list(generate_primes(1000))', globals=globals(), number=100000)
-27.856392198998947
+if __name__ == "__main__":
+    print("timing generate_primes_v3")
+    print(min(timeit.Timer('list(generate_primes_v3(1000))', globals=globals()).repeat(5, no_iterations)))
 
-This latest version compares unfavourably to the previous version.
-We can conclude that the time complexity of maintaining prime multiples
-to test prime candidates is greater than the modulus operation being
-performed per candidate. This behaviour may be dependant on the
-particular computer architecture since division may be implemented in
-different ways.
+"""
+Version 3 (12.796323481999934 seconds) compares unfavourably to the
+previous version.  We can conclude that the time complexity of
+maintaining prime multiples to test prime candidates is greater than
+the modulus operation being performed per candidate. This behaviour
+may be dependant on the particular computer architecture since
+division may be implemented in different ways.
 
 todo: Try a modified sieve
 - https://code.activestate.com/recipes/117119-sieve-of-eratosthenes/
