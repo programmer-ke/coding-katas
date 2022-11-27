@@ -146,6 +146,7 @@ An overall algorithm would be like follows.
 """
 import math
 
+
 def generate_primes_v1(n):
     """Return all primes less than or equal to n
 
@@ -291,6 +292,8 @@ assert _is_prime(23, [2, 3, 5], num_divisors=3) == True
 At this point we have completed the prime generate and can run a few
 tests.
 """
+
+
 def test_generating_primes(func):
     assert list(func(1)) == []
     assert list(func(2)) == [2]
@@ -298,6 +301,7 @@ def test_generating_primes(func):
     assert list(func(10)) == [2, 3, 5, 7]
     assert list(func(25)) == [2, 3, 5, 7, 11, 13, 17, 19, 23]
     assert list(func(1000)) == list(sieve_of_eratosthenes(1000))
+
 
 test_generating_primes(generate_primes_v1)
 
@@ -357,7 +361,7 @@ def generate_primes_v2(n):
 
     assert n > 0
 
-    prime_divisors, num_divisors =[5], 1
+    prime_divisors, num_divisors = [5], 1
     max_divisor_index, divisors_candidate_limit = 0, 49
     sqrt_n = math.sqrt(n)
 
@@ -414,6 +418,7 @@ def _is_prime(candidate, prime_divisors, max_divisor_index, num_divisors):
 
     return True
 
+
 test_generating_primes(generate_primes_v2)
 
 """
@@ -467,6 +472,7 @@ Since our candidate generator does not generate multiples of 2 and 3,
 we can exclude them from the prime testers list.
 """
 
+
 def generate_primes_v3(n):
     """Return all primes less than or equal to n
 
@@ -478,7 +484,7 @@ def generate_primes_v3(n):
 
     prime_testers, num_testers = [5], 1
     max_tester_index, testers_candidate_limit = 0, 49
-    prime_multiples = [prime_testers[max_tester_index]**2]
+    prime_multiples = [prime_testers[max_tester_index] ** 2]
     sqrt_n = math.sqrt(n)
 
     for prime_candidate in _generate_prime_candidates(maxnum=n):
@@ -493,7 +499,7 @@ def generate_primes_v3(n):
         ):
             # Include next prime tester in testing
             max_tester_index += 1
-            prime_multiples.append(prime_testers[max_tester_index]**2)
+            prime_multiples.append(prime_testers[max_tester_index] ** 2)
 
             if max_tester_index + 1 < num_testers:
                 # Set the next upper limit for candidate with current prime testers
@@ -502,7 +508,11 @@ def generate_primes_v3(n):
                 )
 
         if _is_prime(
-            prime_candidate, prime_testers, prime_multiples, max_tester_index, num_testers
+            prime_candidate,
+            prime_testers,
+            prime_multiples,
+            max_tester_index,
+            num_testers,
         ):
             yield prime_candidate
 
@@ -511,12 +521,14 @@ def generate_primes_v3(n):
                 num_testers += 1
 
 
-def _is_prime(candidate, prime_testers, prime_multiples, max_tester_index, num_divisors):
+def _is_prime(
+    candidate, prime_testers, prime_multiples, max_tester_index, num_divisors
+):
     """Returns a boolean indicating whether the candidate is prime
 
     The candidate  is prime if it  is indivisible by any the prime
     numbers less than or equal to its square root.
-    
+
     We determine this by checking that the candidate is not equal
     to any multiples of these prime numbers.
 
@@ -565,37 +577,42 @@ todo: Try a modified sieve
 - https://code.activestate.com/recipes/117119-sieve-of-eratosthenes/
 """
 
+
 def eratosthenes1(n):
-    '''Yields the sequence of prime numbers via the Sieve of Eratosthenes.'''
+    """Yields the sequence of prime numbers via the Sieve of Eratosthenes."""
     D = {}  # map composite integers to primes witnessing their compositeness
-    q = 2   # first integer to test for primality
+    q = 2  # first integer to test for primality
     while not q > n:
         if q not in D:
-            yield q        # not marked composite, must be prime
-            D[q*q] = [q]   # first multiple of q not already marked
+            yield q  # not marked composite, must be prime
+            D[q * q] = [q]  # first multiple of q not already marked
         else:
-            for p in D[q]: # move each witness to its next multiple
-                D.setdefault(p+q,[]).append(p)
-            del D[q]       # no longer need D[q], free memory
+            for p in D[q]:  # move each witness to its next multiple
+                D.setdefault(p + q, []).append(p)
+            del D[q]  # no longer need D[q], free memory
         q += 1
+
 
 test_generating_primes(eratosthenes1)
 
+
 def eratosthenes2(n):
-    '''Yields the sequence of prime numbers via the Sieve of Eratosthenes.'''
+    """Yields the sequence of prime numbers via the Sieve of Eratosthenes."""
     D = {}  # map composite integers to primes witnessing their compositeness
-    q = 2   # first integer to test for primality
+    q = 2  # first integer to test for primality
 
     while not q > n:
         p = D.pop(q, None)
         if p:
             x = p + q
-            while x in D: x += p
+            while x in D:
+                x += p
             D[x] = p
         else:
-            D[q*q] = q
+            D[q * q] = q
             yield q
         q += 1
+
 
 test_generating_primes(eratosthenes2)
 
