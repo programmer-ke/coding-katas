@@ -306,21 +306,37 @@ def test_generating_primes(func):
 test_generating_primes(generate_primes_v1)
 
 
-
 """
 Comparing the two mechanisms we have so far on generating prime
 numbers, I find on my machine that the sieve of eratosthenes
-(10.301812280999002 seconds) is faster than the latter approach
-(12.173762299000373 seconds).
+(10.329625175998444 seconds) is faster than the latter approach
+(12.171041731000514 seconds).
 """
 
-if __name__ == "__main__":
+# To compare time measurements, invoke script with argument 't'
+import sys
+
+TIMING_MODE = True if (len(sys.argv) > 1 and sys.argv[1] == "t") else False
+if TIMING_MODE:
     import timeit
+
     no_iterations = 10000
     print("timing sieve_of_eratosthenes")
-    print(min(timeit.Timer('list(sieve_of_eratosthenes(1000))', globals=globals()).repeat(5, no_iterations)))
+    print(
+        min(
+            timeit.Timer(
+                "list(sieve_of_eratosthenes(1000))", globals=globals()
+            ).repeat(5, no_iterations)
+        )
+    )
     print("timing generate_primes_v1")
-    print(min(timeit.Timer('list(generate_primes_v1(1000))', globals=globals()).repeat(5, no_iterations)))
+    print(
+        min(
+            timeit.Timer(
+                "list(generate_primes_v1(1000))", globals=globals()
+            ).repeat(5, no_iterations)
+        )
+    )
 
 """
 The problem with the sieve of eratosthenes is that the prime
@@ -431,11 +447,17 @@ test_generating_primes(generate_primes_v2)
 
 """
 This version shows the best performance so far in generating primes
-(9.851660360998721 seconds).
+(9.930310007999651 seconds).
 """
-if __name__ == "__main__":
+if TIMING_MODE:
     print("timing generate_primes_v2")
-    print(min(timeit.Timer('list(generate_primes_v2(1000))', globals=globals()).repeat(5, no_iterations)))
+    print(
+        min(
+            timeit.Timer(
+                "list(generate_primes_v2(1000))", globals=globals()
+            ).repeat(5, no_iterations)
+        )
+    )
 
 """
 One potentially expensive operation being performed per prime
@@ -569,12 +591,18 @@ def _is_prime(
 
 test_generating_primes(generate_primes_v3)
 
-if __name__ == "__main__":
+if TIMING_MODE:
     print("timing generate_primes_v3")
-    print(min(timeit.Timer('list(generate_primes_v3(1000))', globals=globals()).repeat(5, no_iterations)))
+    print(
+        min(
+            timeit.Timer(
+                "list(generate_primes_v3(1000))", globals=globals()
+            ).repeat(5, no_iterations)
+        )
+    )
 
 """
-Version 3 (12.796323481999934 seconds) compares unfavourably to the
+Version 3 (12.78460630399968 seconds) compares unfavourably to the
 previous version.  We can conclude that the time complexity of
 maintaining prime multiples to test prime candidates is greater than
 the modulus operation being performed per candidate. This behaviour
@@ -626,4 +654,106 @@ test_generating_primes(eratosthenes2)
 
 """
 todo: have a version for each, do proper benchmarking (see timeit documentation)
+"""
+
+"""
+With the previous version of the modified sieve algorithm, we update
+multiples of primes if necessary for each prime candidate. We do this
+by iterating through the list of multiples.
+
+Suppose we could hold all the multiples as keys in a dictionary, to
+check whether a candidate is prime by a membership test in the
+dictionary which is practically an O(1) (constant) time operation.
+
+The value of an item in the dictionary is the prime number
+corresponding to the multiple. If the candidate is missing from the
+dictionary, we conclude it's a prime number and initialize its first
+multiple in the dictionary as its square.
+
+If it exists in the dictionary, we know that it is not prime. At this
+point, we calculate and set the next multiple associated with the
+prime number to be used for testing against a future candidate. We can
+then delete the dictionary item associated with the current multiple
+since we no longer have any use for it. This means that the space
+complexity will peak at O(m), where m = sqrt(n), n is our maximum
+number.
+
+An issue then emerges where some primes will share multiples. We can
+work around this by incrementing the multiple associated with the
+prime number until we find a unique one, and add that to the
+dictionary.
+
+A simple optimization we can make is to skip multiples of 2, because
+all even numbers are non-primes. The square of an odd number will
+always be odd e.g. 3 * 3 = 9, 5 * 5 = 25, 11 * 11 = 121
+
+We'll increment the multiples by double the prime number to skip
+the even multiples. The sum of and odd number and an even number will
+always be odd. For example, the multiples of 3 and 5 will be incremented in
+the following sequences as we add increment by double the prime.
+
+3: 9, 15, 21, 27, 33, 39, ...
+5: 25, 35, 45, 55, 65, 75, ...
+"""
+
+
+def generate_primes_v4(n):
+    """Generate all prime numbers <= n
+
+    multiples dict holds key=> value pairs of multiple => prime
+    """
+
+    assert n > 0
+
+    multiples = {}
+    candidate = 2
+
+    while not candidate > n:
+
+        if candidate == 2:
+            yield candidate
+            candidate += 1
+            continue
+
+        if _is_prime(candidate, multiples):
+            yield candidate
+            multiples[candidate * candidate] = candidate
+
+        else:
+            current_multiple = candidate
+            _set_next_unique_multiple(current_multiple, multiples)
+            del multiples[current_multiple]
+
+        candidate += 2
+
+
+def _is_prime(candidate, multiples):
+    return candidate not in multiples
+
+
+def _set_next_unique_multiple(multiple, multiples):
+
+    prime_factor = multiples[multiple]
+    while multiple in multiples:
+        multiple += prime_factor * 2
+    multiples[multiple] = prime_factor
+
+
+test_generating_primes(generate_primes_v4)
+
+if TIMING_MODE:
+    print("timing generate_primes_v4")
+    print(
+        min(
+            timeit.Timer(
+                "list(generate_primes_v4(1000))", globals=globals()
+            ).repeat(5, no_iterations)
+        )
+    )
+
+"""
+This version turns out to be the fastest overall (8.464073090000966
+seconds).
+
+todo: summarize and finalize
 """
