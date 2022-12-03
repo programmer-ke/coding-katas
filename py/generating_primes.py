@@ -707,6 +707,7 @@ def generate_primes_v4(n):
 
     multiples = {}
     candidate = 2
+    sqrt_n = math.sqrt(n)
 
     while not candidate > n:
 
@@ -717,7 +718,8 @@ def generate_primes_v4(n):
 
         if _is_prime(candidate, multiples):
             yield candidate
-            multiples[candidate * candidate] = candidate
+            if not candidate > sqrt_n:
+                multiples[candidate * candidate] = candidate
 
         else:
             current_multiple = candidate
@@ -752,8 +754,33 @@ if TIMING_MODE:
     )
 
 """
-This version turns out to be the fastest overall (8.464073090000966
-seconds).
+This version of the modified sieve turns out to be the fastest overall
+(8.464073090000966 seconds).
 
-todo: summarize and finalize
+By generating numbers on the fly, it avoids storage cost of O(n) for
+generating primes upto n as in our initial sieve of eratosthenes
+implementation. The storage cost will be O(sqrt(n)) because we're
+only storing unique multiples of prime numbers <= sqrt(n).
+
+The determination of whether a number is prime now takes constant time
+because it's now simply a membership test in a python dict, which has
+O(1) lookup time. This is in contrast to comparing a candidate with
+a list of primes, or multiple of primes as in the previous versions.
+
+We now have a prime number generator that generates primes with a
+reasonably well enough time and space complexity. However, there are
+other theoretically faster sieves for generating primes e.g. the 
+Atkins Sieve.
+
+However, for production software, it is better to use a package
+off the shelf that has been highly optimized and battle-tested 
+rather than rolling one by hand.
+
+References
+---------
+https://en.wikipedia.org/wiki/Generation_of_primes
+https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes
+https://code.activestate.com/recipes/117119-sieve-of-eratosthenes/
+
+todo: final editing then publish 
 """
