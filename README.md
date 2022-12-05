@@ -5,6 +5,7 @@ quick reference.
 
 ## Index
 
+- [generating_primes.py](py/generating_primes.py): Generating prime numbers
 - [gcd.py](py/gcd.py): Calculating the greatest common divisor
 - [square_root.py](py/square_root.py): Calculate square root of a number
 - [base_conversion.py](py/base_conversion.py): Convert a number from on base to another
