@@ -153,8 +153,8 @@ def generate_primes_v1(n):
     All prime numbers upto n are indivisible by all
     prime numbers <= sqrt(n)
 
-    Since our generator skips multiples of 2 and 3 from 5 onwards, We
-    only need test each candidate with primes starting from 5
+    Our candidate generator skips multiples of 2 and 3 from 5 onwards,
+    so we only need test each candidate with primes starting from 5
     """
 
     assert n > 0
@@ -313,7 +313,7 @@ numbers, I find on my machine that the sieve of eratosthenes
 (12.171041731000514 seconds).
 """
 
-# To compare time measurements, invoke script with argument 't'
+# To measure and compare the approaches, invoke script with argument 't'
 import sys
 
 TIMING_MODE = True if (len(sys.argv) > 1 and sys.argv[1] == "t") else False
@@ -343,10 +343,9 @@ The problem with the sieve of eratosthenes is that the prime
 candidates list grows proportionally with n, and for large values of
 n, we run out of space.
 
-We next explore ways of optimizing our latest approach. We
-notice that whenever we're testing a candidate for primality, we
-calculate its square root. This adds to the computation complexity of
-testing each candidate.
+We next explore ways of optimizing v1. We notice that whenever we're
+testing a candidate for primality, we calculate its square root. This
+adds to the time complexity of testing each candidate.
 
 Since we only need to test a candidate with a prime number less than or
 equal to its square root, we notice the following relationship between
@@ -462,11 +461,11 @@ if TIMING_MODE:
 """
 One potentially expensive operation being performed per prime
 candidate is the modulus operation, which is in essence a division
-operation. Division is an relatively expensive operation and so
+operation. Division is an relatively [expensive operation][1] and so
 eliminating this may possibly improve the performance of the
 algorithm.
 
-See: https://stackoverflow.com/q/15745819
+[1]: https://stackoverflow.com/q/15745819
 
 A clue we can get from the sieve of eratosthenes is that we only need
 to eliminate multiples of all primes <= sqrt(n) when generating all
@@ -483,8 +482,7 @@ to the list of prime numbers.
 Compared to the sieve algorithm, we use significantly less storage as
 all non-primes are discarded. Compared to our latest implementation,
 we incur an additional cost of space; multiples of primes to be tested
-against the candidate, but this is with the benefit of avoiding the
-modulus operation.
+against the candidate, but this helps us avoid the modulus operation.
 
 The following table shows, for each range of candidate x, the prime
 testers used, and their corresponding multiples. We notice that for
@@ -497,7 +495,7 @@ candidate x  | prime testers  | corresponding multiples
 3<=x<9       | 2              | 4+
 9<=x<25      | 2, 3           | 10+, 9+
 25<=x<49     | 2, 3, 5        | 26+, 27+, 25+
-49<=x<121    | 2, 3, 5, 7     | 40+, 51+, 50+, 49+
+49<=x<121    | 2, 3, 5, 7     | 50+, 51+, 50+, 49+
 
 Since our candidate generator does not generate multiples of 2 and 3,
 we can exclude them from the prime testers list.
@@ -566,14 +564,9 @@ def _is_prime(
     max_tester_index will indicate the where the max prime number we
     use for testing is in the prime_testers list"""
 
-    # validate input
-    assert candidate > 1
-    assert num_divisors > max_tester_index
-    try:
-        prime_multiples[max_tester_index]
-    except IndexError:
-        msg = "Number of multiples is less than number of prime testers"
-        raise AssertionError(msg)
+    _validate_tester_input(
+        candidate, num_divisors, max_tester_index, prime_multiples
+    )
 
     # test for primality
     for i in range(max_tester_index + 1):
@@ -587,6 +580,18 @@ def _is_prime(
             return False
 
     return True
+
+
+def _validate_tester_input(
+    candidate, num_divisors, max_tester_index, prime_multiples
+):
+    assert candidate > 1
+    assert num_divisors > max_tester_index
+    try:
+        prime_multiples[max_tester_index]
+    except IndexError:
+        msg = "Number of multiples is less than number of prime testers"
+        raise AssertionError(msg)
 
 
 test_generating_primes(generate_primes_v3)
@@ -609,57 +614,9 @@ the modulus operation being performed per candidate. This behaviour
 may be dependant on the particular computer architecture since
 division may be implemented in different ways.
 
-todo: Try a modified sieve
-- https://code.activestate.com/recipes/117119-sieve-of-eratosthenes/
-"""
-
-
-def eratosthenes1(n):
-    """Yields the sequence of prime numbers via the Sieve of Eratosthenes."""
-    D = {}  # map composite integers to primes witnessing their compositeness
-    q = 2  # first integer to test for primality
-    while not q > n:
-        if q not in D:
-            yield q  # not marked composite, must be prime
-            D[q * q] = [q]  # first multiple of q not already marked
-        else:
-            for p in D[q]:  # move each witness to its next multiple
-                D.setdefault(p + q, []).append(p)
-            del D[q]  # no longer need D[q], free memory
-        q += 1
-
-
-test_generating_primes(eratosthenes1)
-
-
-def eratosthenes2(n):
-    """Yields the sequence of prime numbers via the Sieve of Eratosthenes."""
-    D = {}  # map composite integers to primes witnessing their compositeness
-    q = 2  # first integer to test for primality
-
-    while not q > n:
-        p = D.pop(q, None)
-        if p:
-            x = p + q
-            while x in D:
-                x += p
-            D[x] = p
-        else:
-            D[q * q] = q
-            yield q
-        q += 1
-
-
-test_generating_primes(eratosthenes2)
-
-"""
-todo: have a version for each, do proper benchmarking (see timeit documentation)
-"""
-
-"""
-With the previous version of the modified sieve algorithm, we update
-multiples of primes if necessary for each prime candidate. We do this
-by iterating through the list of multiples.
+With version 3 of the modified sieve algorithm, we update multiples of
+primes if necessary for each prime candidate. We do this by iterating
+through the list of multiples.
 
 Suppose we could hold all the multiples as keys in a dictionary, to
 check whether a candidate is prime by a membership test in the
@@ -687,10 +644,11 @@ A simple optimization we can make is to skip multiples of 2, because
 all even numbers are non-primes. The square of an odd number will
 always be odd e.g. 3 * 3 = 9, 5 * 5 = 25, 11 * 11 = 121
 
-We'll increment the multiples by double the prime number to skip
-the even multiples. The sum of and odd number and an even number will
-always be odd. For example, the multiples of 3 and 5 will be incremented in
-the following sequences as we add increment by double the prime.
+We'll increment the multiples by double the prime number to skip the
+even multiples. The sum of and odd number and an even number will
+always be odd. For example, the multiples of 3 and 5 will be
+incremented in the following sequences as we add increment by double
+the prime.
 
 3: 9, 15, 21, 27, 33, 39, ...
 5: 25, 35, 45, 55, 65, 75, ...
@@ -758,9 +716,9 @@ This version of the modified sieve turns out to be the fastest overall
 (8.464073090000966 seconds).
 
 By generating numbers on the fly, it avoids storage cost of O(n) for
-generating primes upto n as in our initial sieve of eratosthenes
-implementation. The storage cost will be O(sqrt(n)) because we're
-only storing unique multiples of prime numbers <= sqrt(n).
+generating primes upto n as in the standard sieve of eratosthenes
+implementation. The storage cost will be O(sqrt(n)) because we're only
+storing unique multiples of prime numbers <= sqrt(n).
 
 The determination of whether a number is prime now takes constant time
 because it's now simply a membership test in a python dict, which has
@@ -772,15 +730,9 @@ reasonably well enough time and space complexity. However, there are
 other theoretically faster sieves for generating primes e.g. the 
 Atkins Sieve.
 
-However, for production software, it is better to use a package
-off the shelf that has been highly optimized and battle-tested 
-rather than rolling one by hand.
-
 References
 ---------
 https://en.wikipedia.org/wiki/Generation_of_primes
 https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes
 https://code.activestate.com/recipes/117119-sieve-of-eratosthenes/
-
-todo: final editing then publish 
 """
