@@ -5,6 +5,7 @@ quick reference.
 
 ## Index
 
+- [generating_pseudorandom_numbers.py](py/generating_pseudorandom_numbers.py): pseudo-random number generator
 - [generating_primes.py](py/generating_primes.py): Generating prime numbers
 - [gcd.py](py/gcd.py): Calculating the greatest common divisor
 - [square_root.py](py/square_root.py): Calculate square root of a number
