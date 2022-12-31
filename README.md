@@ -22,6 +22,7 @@ quick reference.
 - [binary_tree_traversal.py](py/binary_tree_traversal.py): Binary tree traversal
 - [reverse_linkedlist.py](py/reverse_linkedlist.py): Initialize and reverse a linked list
 - [hash_table.py](py/hash_table.py): Hash table with separate chaining
+- [nth_fibonacci.py](py/nth_fibonacci.py): Find the nth fibonacci number
 - [fibonacci_sequence.py](py/fibonacci_sequence.py): Different approaches to generating the fibonacci sequence
 
 

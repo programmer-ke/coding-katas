@@ -1,9 +1,9 @@
 """
-Problem: Given a number n, find the nth number in the fibonacci
+Problem: Given a number n, return the nth item in the fibonacci
 sequence.
 
-The number n is a positive number greater than zero. The first few
-numbers in the sequence are shown in the function below.
+The number n is a number greater than zero. The first few numbers in
+the sequence are shown in the function below.
 """
 
 def test(nfib):
@@ -26,7 +26,9 @@ f1 = 0, f2 = 1 and using the formula
 
 fn+2 = fn+1 + fn, where n > 0  (formula #0)
 
-We can generate members of the sequence until our desired value of n
+we can generate members of the sequence until our desired value of n
+
+(Read fn as f sub n, fn+1 as f sub n+1.)
 """
 
 
@@ -56,13 +58,13 @@ test(nfib)
 """
 The time complexity of this approach is O(n), because we have to 
 generate all the fibonacci numbers in sequence until we reach our
-desired nth fibonacci number.
+desired nth number.
 
 We can explore whether there's a better mechanism for generating the
 nth fibonacci number without using the two terms preceeding it in the
 sequence.
 
-We can check whether it's possible to the generate the nth number
+We investigate whether it's possible to the generate the nth number
 by a doubling of terms in some way instead of mere addition. For
 example, can we represent f8 in terms of f4 and f5?
 
@@ -78,7 +80,7 @@ f8 = ((f5 + f4) + f5) + (f5 + f4)
 
 f8 = 3f5 + 2f4
 
-But we find that f5 = 3 and f4 = 2. Therefore,
+We know that f5 = 3 and f4 = 2. Therefore,
 
 f8 = f5 * f5 + f4 * f4
 
@@ -119,10 +121,10 @@ f2n+1 = (fn+1)^2 + 2*fn*fn+1 (formula #2)
 We can then look at some examples on how we'd use the formulas we have
 so far in generating the nth fibonacci number.
 
-A process that involves repeatedly multiplying or dividing by two may
-possibly be represented by a sequence of binary digits. So we'll look
-at the steps involved in generating our result and compare it with the
-binary representation of the number n.
+Also, a process that involves repeatedly doubling or halving by two
+may possibly be represented by a sequence of binary digits. So we'll
+look at the steps involved in generating our result and compare it
+with the binary representation of the number n.
 
 For n = 10 (binary sequence 1010), we find the following steps are
 needed after several tries.
@@ -145,12 +147,13 @@ f3, f4 -> f6, f7                      | Forumlae #1 and #2                      
 f6, f7 -> f12, f13 ; f12, f13 -> f14  | Forumlae #1 and #2 then extend seq by 1 using #0 | f13, f14       | 1   |
 
 If we compare the operations needed to generate the nth fibonacci
-number, the following pattern emerges.
+number with the binary representation of n, the following pattern
+emerges.
 
 - The strategy can be represented by the binary representation of n
   from the most significant bit backwards (as in the last column
   above).
-- Initializing fn and fn+1 as f1 and f2 has is associated with a 1
+- Initializing fn and fn+1 as f1 and f2 is associated with a 1
 - After initialization, whenever the associated binary digit is an 0,
   we use derived formulae #1 and #2 to get the next fn and fn+1
 - Whenever associated binary digit is a 1, we use the formulae #1 and
@@ -195,12 +198,14 @@ assert _binary_representation(1) == [1]
 assert _binary_representation(2) == [1, 0]
 assert _binary_representation(13) == [1, 1, 0, 1]
 
+
 def _execute_fibonacci_strategy(binary_n):
     """Calculate the nth number in the fibonacci sequence
 
     binary_n is the binary representation of the number n.
     
     Uses the formulae:
+
     0) fn+2 = fn+1 + fn
     1) f2n = (fn+1)^2 + (fn)^2
     2) f2n+1 = (fn+1)^2 + 2*fn*fn+1
@@ -220,10 +225,10 @@ def _execute_fibonacci_strategy(binary_n):
     fn, fnplus1 = 0, 1
 
     for digit in binary_n[1:]:
-        # f2n = (fn+1)^2 + (fn)^2
-        # f2n+1 = (fn+1)^2 + 2*fn*fn+1
         fnplus1_sq = fnplus1 ** 2
+        # f2n = (fn+1)^2 + (fn)^2
         f2n = fnplus1_sq + fn ** 2
+        # f2n+1 = (fn+1)^2 + 2*fn*fn+1
         f2nplus1 = fnplus1_sq + (2 * fn * fnplus1)
 
         fn, fnplus1 = f2n, f2nplus1
@@ -240,4 +245,8 @@ test(nfib)
 With our second approach, both the space and time complexity are
 O(log(n)). This is because we use the binary representation of n to
 execute our computation strategy, which is in the order of log(n, 2).
+
+A similar approach of using the binary representation of the target
+can also be used to implement a strategy for squaring by a large number
+in O(log(n)) steps.
 """
