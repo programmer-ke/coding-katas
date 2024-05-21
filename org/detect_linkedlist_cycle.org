@@ -1,0 +1,99 @@
+* Detect cycle in a linked list
+
+Given the head of a linked list, return a boolean indicating whether
+it has a cycle or not.
+
+A node can be represented as a class with value and a pointer
+to the next node.
+
+#+name: Node definition
+#+begin_src python :session
+from dataclasses import dataclass
+
+@dataclass
+class Node:
+    value: int
+    next: 'Node' = None
+#+end_src
+
+#+RESULTS:
+
+#+RESULTS: Node definition
+
+The function ~has_cycle(head)~ should return ~True~ if head has a
+cycle like below:
+
+#+begin_src python :session :results output
+list1 = Node(1)
+second = list1.next = Node(2)
+third = second.next = Node(3)
+third.next = second
+print(list1)
+# has_cycle(list1) -> True
+#+end_src
+
+#+RESULTS:
+: Node(value=1, next=Node(value=2, next=Node(value=3, next=...)))
+
+It should return false if head does not have a cycle:
+
+#+begin_src python :session
+list2 = Node(1)
+second = list2.next = Node(2)
+third = second.next = Node(3)
+print(list2)
+# has_cycle(list2) -> False
+
+#+end_src
+
+#+RESULTS:
+: None
+
+
+** First approach: Using a visited set
+
+Iterate through all the nodes of the linked list adding each node to a
+set indicating that it has been visited. If a visited node is found to
+already exist in the set, flag a detected cycle.
+
+#+begin_src python :session
+def has_cycle(head):
+    visited = set()
+    # assuming unique values for each node, use node value to keep track
+    # of visited nodes
+    visited.add(head.value)
+    current = head
+    while current.next:
+        if current.next.value in visited:
+            return True
+        current = current.next
+        visited.add(current.value)
+    return False
+#+end_src
+
+#+RESULTS:
+
+=has_cycle= should return =True= for ~list1~,
+
+#+begin_src python :session
+has_cycle(list1)
+#+end_src
+
+#+RESULTS:
+: True
+
+and =False= for ~list2~
+
+#+begin_src python :session
+has_cycle(list2)
+#+end_src
+
+#+RESULTS:
+: False
+
+*** Complexity
+In a linked list with no cycles of length n, this approach has a space
+complexity of O(n) because all the nodes will be added to the visited
+set.
+
+** TODO Second approach: Floyd's Tortoise and Hare

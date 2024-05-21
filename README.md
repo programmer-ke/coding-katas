@@ -26,6 +26,7 @@ quick reference.
 - [fibonacci_sequence.py](py/fibonacci_sequence.py): Different approaches to generating the fibonacci sequence
 
 ### Linked Lists
+- [detect_linkedlist_cycle.org](org/detect_linkedlist_cycle.org): Detect cycle in linked list
 - [reverse_linkedlist.py](py/reverse_linkedlist.py): Initialize and reverse a linked list
 
 ## Others
