@@ -1,3 +1,5 @@
+"""Implementing an object system"""
+
 import math
 
 

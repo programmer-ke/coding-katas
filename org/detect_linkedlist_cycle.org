@@ -97,3 +97,7 @@ complexity of O(n) because all the nodes will be added to the visited
 set.
 
 ** TODO Second approach: Floyd's Tortoise and Hare
+
+*** proofs
+ - https://old.reddit.com/r/computerscience/comments/oip2u9/why_are_the_hare_and_tortoise_guaranteed_to_meet/
+ - https://stackoverflow.com/a/6110767/1382495
