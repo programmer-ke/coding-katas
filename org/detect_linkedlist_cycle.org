@@ -1,4 +1,7 @@
 * Detect cycle in a linked list
+:PROPERTIES:
+:header-args: :session
+:END:
 
 Given the head of a linked list, return a boolean indicating whether
 it has a cycle or not.
@@ -7,7 +10,7 @@ A node can be represented as a class with value and a pointer
 to the next node.
 
 #+name: Node definition
-#+begin_src python :session
+#+begin_src python
 from dataclasses import dataclass
 
 @dataclass
@@ -23,7 +26,7 @@ class Node:
 The function ~has_cycle(head)~ should return ~True~ if head has a
 cycle like below:
 
-#+begin_src python :session
+#+begin_src python
 head1 = Node(1)
 second = head1.next = Node(2)
 third = second.next = Node(3)
@@ -35,7 +38,7 @@ third.next = second
 
 It should return false if head does not have a cycle:
 
-#+begin_src python :session
+#+begin_src python
 head2 = Node(1)
 second = head2.next = Node(2)
 third = second.next = Node(3)
@@ -52,7 +55,7 @@ Iterate through all the nodes of the linked list adding each node to a
 set indicating that it has been visited. If a visited node is found to
 already exist in the set, flag a detected cycle.
 
-#+begin_src python :session
+#+begin_src python
 def has_cycle(head):
     visited = set()
     # assuming unique values for each node, use node value to keep track
@@ -71,7 +74,7 @@ def has_cycle(head):
 
 =has_cycle= should return =True= for ~head1~,
 
-#+begin_src python :session
+#+begin_src python
 has_cycle(head1)
 #+end_src
 
@@ -80,7 +83,7 @@ has_cycle(head1)
 
 and =False= for ~head2~
 
-#+begin_src python :session
+#+begin_src python
 has_cycle(head2)
 #+end_src
 
@@ -103,7 +106,7 @@ end of the list.
 The faster pointer, the hare, iterates the list two steps at a time,
 while the slower one, the tortoise, iterates it one step at a time.
 
-#+begin_src python :session
+#+begin_src python
 def has_cycle(head):
     tortoise = hare = head
     while hare.next and hare.next.next:
@@ -118,7 +121,7 @@ def has_cycle(head):
 
 =has_cycle= should return =True= for ~head1~,
 
-#+begin_src python :session
+#+begin_src python
 has_cycle(head1)
 #+end_src
 
@@ -127,7 +130,7 @@ has_cycle(head1)
 
 and =False= for ~head2~
 
-#+begin_src python :session
+#+begin_src python
 has_cycle(head2)
 #+end_src
 
