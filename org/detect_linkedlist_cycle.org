@@ -148,7 +148,9 @@ two pointers to detect cycles.
 ** References
 
 https://stackoverflow.com/a/47203425/1382495
+
 https://stackoverflow.com/a/6110767/1382495
+
 https://en.wikipedia.org/wiki/Cycle_detection
 
 
