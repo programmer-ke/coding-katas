@@ -23,31 +23,27 @@ class Node:
 The function ~has_cycle(head)~ should return ~True~ if head has a
 cycle like below:
 
-#+begin_src python :session :results output
-list1 = Node(1)
-second = list1.next = Node(2)
+#+begin_src python :session
+head1 = Node(1)
+second = head1.next = Node(2)
 third = second.next = Node(3)
 third.next = second
-print(list1)
-# has_cycle(list1) -> True
+# has_cycle(head1) -> True
 #+end_src
 
 #+RESULTS:
-: Node(value=1, next=Node(value=2, next=Node(value=3, next=...)))
 
 It should return false if head does not have a cycle:
 
 #+begin_src python :session
-list2 = Node(1)
-second = list2.next = Node(2)
+head2 = Node(1)
+second = head2.next = Node(2)
 third = second.next = Node(3)
-print(list2)
-# has_cycle(list2) -> False
+# has_cycle(head2) -> False
 
 #+end_src
 
 #+RESULTS:
-: None
 
 
 ** First approach: Using a visited set
@@ -73,31 +69,83 @@ def has_cycle(head):
 
 #+RESULTS:
 
-=has_cycle= should return =True= for ~list1~,
+=has_cycle= should return =True= for ~head1~,
 
 #+begin_src python :session
-has_cycle(list1)
+has_cycle(head1)
 #+end_src
 
 #+RESULTS:
 : True
 
-and =False= for ~list2~
+and =False= for ~head2~
 
 #+begin_src python :session
-has_cycle(list2)
+has_cycle(head2)
 #+end_src
 
 #+RESULTS:
 : False
 
-*** Complexity
-In a linked list with no cycles of length n, this approach has a space
-complexity of O(n) because all the nodes will be added to the visited
-set.
+*** Analysis
+This approach has a space/time complexity of O(n), where n is the
+number of nodes. The list will have to be traversed at most once, to
+find cycles. Since we add each visited node to the stack, the memory
+usage grows by n.
 
-** TODO Second approach: Floyd's Tortoise and Hare
+** Second approach: Floyd's Tortoise and Hare
 
-*** proofs
- - https://old.reddit.com/r/computerscience/comments/oip2u9/why_are_the_hare_and_tortoise_guaranteed_to_meet/
- - https://stackoverflow.com/a/6110767/1382495
+The second approach involves using two pointers iterating the list at
+different speeds. If there is a cycle, the faster one should catch up
+to the slower one. If there's no cycle, the faster one will get to the
+end of the list.
+
+The faster pointer, the hare, iterates the list two steps at a time,
+while the slower one, the tortoise, iterates it one step at a time.
+
+#+begin_src python :session
+def has_cycle(head):
+    tortoise = hare = head
+    while hare.next and hare.next.next:
+        hare = hare.next.next
+        tortoise = tortoise.next
+        if hare.value == tortoise.value:
+            return True
+    return False
+#+end_src
+
+#+RESULTS:
+
+=has_cycle= should return =True= for ~head1~,
+
+#+begin_src python :session
+has_cycle(head1)
+#+end_src
+
+#+RESULTS:
+: True
+
+and =False= for ~head2~
+
+#+begin_src python :session
+has_cycle(head2)
+#+end_src
+
+#+RESULTS:
+: False
+
+*** Analysis
+One possible proof that the hare and tortoise are guaranteed to meet
+is [[https://stackoverflow.com/a/6110767/1382495][here]].
+
+Given n nodes, the time complexity is n, whereas the space complexity
+is O(1) because we only rely on iteration and comparison of the
+two pointers to detect cycles.
+
+** References
+
+https://stackoverflow.com/a/47203425/1382495
+https://stackoverflow.com/a/6110767/1382495
+https://en.wikipedia.org/wiki/Cycle_detection
+
+
