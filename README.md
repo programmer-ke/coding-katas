@@ -5,6 +5,7 @@ quick reference.
 
 ## Index
 
+- [detect_linkedlist_cycle.org](org/detect_linkedlist_cycle.org): Cycle Detection
 - [model_from_scratch_mnist.ipynb](ipynb/model_from_scratch_mnist.ipynb): A simple ML model (almost) from scratch
 - [generating_pseudorandom_numbers.py](py/generating_pseudorandom_numbers.py): pseudo-random number generator
 - [generating_primes.py](py/generating_primes.py): Generating prime numbers
