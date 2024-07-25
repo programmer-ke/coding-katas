@@ -1,6 +1,6 @@
 * Detect cycle in a linked list
 :PROPERTIES:
-:header-args: :session
+:header-args: :session :exports both
 :END:
 
 Given the head of a linked list, return a boolean indicating whether
@@ -152,5 +152,3 @@ https://stackoverflow.com/a/47203425/1382495
 https://stackoverflow.com/a/6110767/1382495
 
 https://en.wikipedia.org/wiki/Cycle_detection
-
-
