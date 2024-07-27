@@ -1,0 +1,438 @@
+* Basics of Binary Search Trees
+:PROPERTIES:
+:header-args: :session :exports both
+:END:
+
+Each node has a maximum of two children. The value of the left child
+is less than the node's value. The value of the right child is greater
+than or equal to the node's value.
+
+A node has a value, and pointers to right and left children. 
+
+#+begin_src python
+from dataclasses import dataclass
+
+@dataclass
+class Node:
+    value: int
+    left: 'Node' = None
+    right: 'Node' = None
+#+end_src
+
+#+RESULTS:
+
+** Building a BST
+
+A tree can be represented as an object with a pointer to the root
+node.  An insert method can be used to insert nodes to the correct
+position maintaining the expected order by value.
+
+#+begin_src python
+@dataclass
+class BST:
+    root: 'Node' = None
+
+    def insert(self, value):
+        if self.root is None:
+            self.root = Node(value)
+        else:
+            self._insert_into_tree(self.root, value)
+
+    def _insert_into_tree(self, node, value):
+        if value < node.value:
+            if node.left is None:
+                node.left = Node(value)
+            else:
+                self._insert_into_tree(node.left, value)
+        else:
+            if node.right is None:
+                node.right = Node(value)
+            else:
+                self._insert_into_tree(node.right, value)
+#+end_src
+
+#+RESULTS:
+
+
+We can then build a tree.
+
+#+begin_src python :results output
+items = [7, 9, 5, 2, 7, 8, 10, 5]
+tree = BST()
+for i in items:
+    tree.insert(i)
+
+print(tree)
+#+end_src
+
+#+RESULTS:
+: BST(root=Node(value=7, left=Node(value=5, left=Node(value=2, left=None, right=None), right=Node(value=5, left=None, right=None)), right=Node(value=9, left=Node(value=7, left=None, right=Node(value=8, left=None, right=None)), right=Node(value=10, left=None, right=None))))
+
+
+
+
+At this point, the tree looks like below:
+
+[[file:img/sample_bst_tree.png]]
+
+** In order Traversal
+
+For each node, the action is performed on the values in the left
+subtree, then the current node's value, then the value of the right
+subtree.
+
+This can be used to perform an action in ascending order of
+values in the tree.
+
+Here, the action would be to simply print out the node's value.
+
+#+begin_src python
+def action(value):
+    print(value, end=" ")
+#+end_src
+
+#+RESULTS:
+
+*** Recursive
+
+The traversing function is called recursively on each node
+
+#+begin_src python :results output
+def inorder_recursive(node, action):
+    if node.left:
+        inorder_recursive(node.left, action)
+    action(node.value)
+    if node.right:
+        inorder_recursive(node.right, action)
+
+inorder_recursive(tree.root, action)
+#+end_src
+
+#+RESULTS:
+: 2 5 5 7 7 8 9 10
+
+*** Iterative
+
+Traversing iteratively uses a stack to track nodes to visit. We ensure
+that the nodes action is performed on the nodes in the correct order
+by inserting the nodes into the stack in reverse order.
+
+Additionally, we keep track of nodes have been processed, i.e. their
+children inserted into the stack, to avoid getting stack in an
+infinite loop.
+
+#+begin_src python :results output
+def inorder_iterative(node, action):
+    stack = []
+    processed = set()
+    stack.append(node)
+    while stack:
+        n = stack.pop()
+        if id(n) in processed:
+            action(n.value)
+        else:
+            if n.right:
+                stack.append(n.right)
+            stack.append(n)
+            if n.left:
+                stack.append(n.left)
+            processed.add(id(n))
+
+inorder_iterative(tree.root, action)
+#+end_src
+
+#+RESULTS:
+: 2 5 5 7 7 8 9 10
+
+** Pre-Order Traversal
+
+For each node, the action is performed in the node's value, followed
+by the node's left subtree values then the node's right subtree
+values.
+
+This can be used, for instance, to create a copy of the tree with the
+same structure since each parent node is visited before the children.
+
+*** Recursive
+
+#+begin_src python :results output
+def preorder_recursive(node, action):
+    action(node.value)
+    if node.left:
+        preorder_recursive(node.left, action)
+    if node.right:
+        preorder_recursive(node.right, action)
+
+preorder_recursive(tree.root, action)
+#+end_src
+
+#+RESULTS:
+: 7 5 2 5 9 7 8 10
+
+*** Iterative
+
+A stack is used to keep track of nodes to traverse. Action is performed
+in order of popping items from the stack
+
+
+#+begin_src python :results output
+def preorder_iterative(node, action):
+    stack = []
+    stack.append(node)
+    while stack:
+        n = stack.pop()
+        if n.right:
+            stack.append(n.right)
+        if n.left:
+            stack.append(n.left)
+        action(n.value)
+
+preorder_iterative(tree.root, action)
+#+end_src
+
+#+RESULTS:
+: 7 5 2 5 9 7 8 10
+
+** Post-Order Traversal
+
+For each node, the action is performed on the left subtree values,
+then the right subtree values and finally the current node's values.
+
+
+This can be used, for instance, to delete a tree, because each nodes
+children are processed before the node itself, all the way to the root.
+
+*** Recursive
+
+#+begin_src python :results output
+def postorder_recursive(node, action):
+    if node.left:
+        postorder_recursive(node.left, action)
+    if node.right:
+        postorder_recursive(node.right, action)
+    action(node.value)
+
+postorder_recursive(tree.root, action)
+#+end_src
+
+#+RESULTS:
+: 2 5 5 8 7 10 9 7
+
+*** Iterative
+
+#+begin_src python :results output
+def postorder_iterative(node, action):
+    stack = []
+    stack.append(node)
+    processed = set()
+    while stack:
+        n = stack.pop()
+        if id(n) in processed:
+            action(n.value)
+        else:
+            stack.append(n)
+            if n.right:
+                stack.append(n.right)
+            if n.left:
+                stack.append(n.left)
+            processed.add(id(n))
+
+postorder_iterative(tree.root, action)
+#+end_src
+
+#+RESULTS:
+: 2 5 5 8 7 10 9 7
+
+** Breadth first search
+
+The examples we've been looking at so far demonstrate some form of
+depth first search, when we select a route down the tree, we
+traverse all terminal nodes before backtracking to a different route.
+
+With breath first search, however, we traverse all the nodes at a
+particular level of the tree before moving on to the lower level.
+
+To implement this, we make use of a queue instead for its First In
+First out semantics. The goal is to queue each level's nodes in order
+from left to right and as we retrieve them, we start queueing the next
+level's nodes following the same order.
+
+We use python's ~deque~ data structure which is short for 'double
+ended queue'.
+
+#+begin_src python :results output
+from collections import deque
+
+def breadth_first(node, action):
+    queue = deque()
+    queue.append(node)
+    while queue:
+        n = queue.popleft()
+        action(n.value)
+        if n.left:
+            queue.append(n.left)
+        if n.right:
+            queue.append(n.right)
+
+breadth_first(tree.root, action)
+#+end_src
+
+#+RESULTS:
+: 7 5 9 2 5 7 10 8
+
+** Deleting a node in a BST
+
+To delete a node, we need to make sure that the BST property is
+maintained i.e. left_child.value <= parent.value <= right_child.value.
+
+To do this, once we identify the node to delete, we replace either
+with the smallest valued node it its right subtree, or the largest
+valued node in its left subtree.
+
+To demonstrate delete, we'll extend the existing BST class with
+delete functionality.
+
+#+begin_src python
+class BST2(BST):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._reset_deletion_state()
+
+    def _reset_deletion_state(self):
+        self._deletion_target = None
+        self._deletion_parent = None
+        self._is_right_child = None
+        self._deletion_replacement_value = None
+
+    def delete(self, value):
+        self._find_deletion_target(self.root, value, None)
+        if self._deletion_target is None:
+            # target not found
+            return
+
+        if self._deletion_target.right:
+            self._find_deletion_replacement(
+                self._deletion_target.right, self._deletion_target, smallest=True
+            )
+        elif self._deletion_target.left:
+            self._find_deletion_replacement(
+                self._deletion_target.left, self._deletion_target, smallest=False
+            )
+        else:
+            if self._deletion_parent is not None:
+                # parent is not root
+                if self._is_right_child:
+                    self._deletion_parent.right = None
+                else:
+                    self._deletion_parent.left = None
+            else:
+                # parent is root
+                self.root = None
+            return
+        self._deletion_target.value = self._deletion_replacement_value
+        self._reset_deletion_state()
+
+    def _find_deletion_replacement(self, node, parent, smallest):
+        if smallest:
+            # traversing right subtree
+            if node.left:
+                self._find_deletion_replacement(node.left, node, smallest)
+            else:
+                self._deletion_replacement_value = node.value
+                if node.right:
+                    # replace current node with right child
+                    if parent is self._deletion_target:
+                        # current node is right child
+                        parent.right = node.right
+                    else:
+                        # current node is left child
+                        parent.left = node.right
+                else:
+                    # delete node from parent
+                    if parent is self._deletion_target:
+                        # current node is right child
+                        parent.right = None
+                    else:
+                        # current node is left child
+                        parent.left = None
+
+        else:
+            # traversing the left subtree looking for largest value
+            if node.right:
+                self._find_deletion_replacement(node.right, smallest)
+            else:
+                self._deletion_replacement_value = node.value            
+                if node.left:
+                    # replace current node with left child
+                    if parent is self._deletion_target:
+                        # current node is left child
+                        parent.left = node.left
+                    else:
+                        # current node is right child
+                        parent.right = node.left
+                else:
+                    # delete current node from parent
+                    if parent is self._deletion_target:
+                        # in left subtree
+                        parent.left = None
+                    else:
+                        # levels deeper in right subtree
+                        parent.right = None
+            
+    def _find_deletion_target(self, node, value, parent):
+        if node.value == value:
+            self._deletion_target = node
+            self._deletion_parent = parent
+        elif value < node.value and node.left:
+            self._is_right_child = False
+            self._find_deletion_target(node.left, value, node)
+        elif value > node.value and node.right:
+            self._is_right_child = True
+            self._find_deletion_target(node.right, value, node)
+#+end_src
+
+#+RESULTS:
+
+Next, we create a new tree and test deletion
+
+#+begin_src python
+tree2 = BST2()
+for i in items:
+    tree2.insert(i)
+
+assert tree2.root.value == 7
+assert tree2.root.right.left.right.value == 8
+
+# delete root
+tree2.delete(7)
+
+# topmost 4 should have been replace by the other 7
+assert tree2.root.value == 7
+assert tree2.root.right.left.value == 8
+
+# delete root
+tree2.delete(7)
+
+assert tree2.root.value == 8
+assert tree2.root.right.left is None
+
+tree2.delete(5)
+# topmost 5 replaced by second one
+assert tree2.root.left.value == 5
+assert tree2.root.left.right is None
+
+# delete terminal node 10
+tree2.delete(10)
+
+assert tree2.root.right.value == 9
+assert tree2.root.right.right is None
+
+tree2.delete(5)
+
+# right terminal node should have 2
+assert tree2.root.left.value == 2
+assert tree2.root.left.right is None
+#+end_src
+
+#+RESULTS:
