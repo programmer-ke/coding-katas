@@ -282,6 +282,8 @@ breadth_first(tree.root, action)
 
 ** Deleting a node in a BST
 
+*** Approach 1
+
 To delete a node, we need to make sure that the BST property is
 maintained i.e. left_child.value <= parent.value <= right_child.value.
 
@@ -295,101 +297,46 @@ delete functionality.
 #+begin_src python
 class BST2(BST):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._reset_deletion_state()
-
-    def _reset_deletion_state(self):
-        self._deletion_target = None
-        self._deletion_parent = None
-        self._is_right_child = None
-        self._deletion_replacement_value = None
-
     def delete(self, value):
-        self._find_deletion_target(self.root, value, None)
-        if self._deletion_target is None:
-            # target not found
-            return
+        self._delete(self.root, value)
 
-        if self._deletion_target.right:
-            self._find_deletion_replacement(
-                self._deletion_target.right, self._deletion_target, smallest=True
-            )
-        elif self._deletion_target.left:
-            self._find_deletion_replacement(
-                self._deletion_target.left, self._deletion_target, smallest=False
-            )
+    def _delete(self, node, value):
+        if node is None:
+            pass
+        if value < node.value:
+            node.left = self._delete(node.left, value)
+        elif value > node.value:
+            node.right = self._delete(node.right, value)
         else:
-            if self._deletion_parent is not None:
-                # parent is not root
-                if self._is_right_child:
-                    self._deletion_parent.right = None
-                else:
-                    self._deletion_parent.left = None
+            # Current node is to be deleted
+            # Consider 3 possibilities
+            # - no children
+            # - one child
+            # - two children
+            if not node.right and not node.left:
+                # no children
+                node = None
+            elif not node.right:
+                # has a left child, replace
+                node = node.left
+            elif not node.left:
+                # has a right child, replace
+                node = node.right
             else:
-                # parent is root
-                self.root = None
-            return
-        self._deletion_target.value = self._deletion_replacement_value
-        self._reset_deletion_state()
+                # has two children
+                # two options, overwrite with smallest from right, or largest from left
+                replacement_value = self._get_smallest(node.right)
+                node.value = replacement_value
+                
+                # delete node with replacement value
+                node.right = self._delete(node.right, replacement_value)
+        return node
 
-    def _find_deletion_replacement(self, node, parent, smallest):
-        if smallest:
-            # traversing right subtree
-            if node.left:
-                self._find_deletion_replacement(node.left, node, smallest)
-            else:
-                self._deletion_replacement_value = node.value
-                if node.right:
-                    # replace current node with right child
-                    if parent is self._deletion_target:
-                        # current node is right child
-                        parent.right = node.right
-                    else:
-                        # current node is left child
-                        parent.left = node.right
-                else:
-                    # delete node from parent
-                    if parent is self._deletion_target:
-                        # current node is right child
-                        parent.right = None
-                    else:
-                        # current node is left child
-                        parent.left = None
+    def _get_smallest(self, node):
+        while node.left:
+            node = node.left
+        return node.value
 
-        else:
-            # traversing the left subtree looking for largest value
-            if node.right:
-                self._find_deletion_replacement(node.right, smallest)
-            else:
-                self._deletion_replacement_value = node.value            
-                if node.left:
-                    # replace current node with left child
-                    if parent is self._deletion_target:
-                        # current node is left child
-                        parent.left = node.left
-                    else:
-                        # current node is right child
-                        parent.right = node.left
-                else:
-                    # delete current node from parent
-                    if parent is self._deletion_target:
-                        # in left subtree
-                        parent.left = None
-                    else:
-                        # levels deeper in right subtree
-                        parent.right = None
-            
-    def _find_deletion_target(self, node, value, parent):
-        if node.value == value:
-            self._deletion_target = node
-            self._deletion_parent = parent
-        elif value < node.value and node.left:
-            self._is_right_child = False
-            self._find_deletion_target(node.left, value, node)
-        elif value > node.value and node.right:
-            self._is_right_child = True
-            self._find_deletion_target(node.right, value, node)
 #+end_src
 
 #+RESULTS:
@@ -436,3 +383,4 @@ assert tree2.root.left.right is None
 #+end_src
 
 #+RESULTS:
+
