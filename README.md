@@ -16,14 +16,15 @@ quick reference.
 - [simple_recursive_descent_parser.py](py/simple_recursive_descent_parser.py): A simple recursive descent parser
 - [bit_manipulation.py](py/bit_manipulation.py): Bit manipulation
 - [heapsort.py](py/heapsort.py): Heapsort
-- [kth_largest.py](py/kth_largest.py): Find kth largest element using binary search tree
-- [binary_search_tree.py](py/binary_search_tree.py): Binary Search Tree
 - [binary_search.py](py/binary_search.py): Binary Search
 - [quicksort.py](py/quicksort.py): Quicksort
-- [binary_tree_traversal.py](py/binary_tree_traversal.py): Binary tree traversal
 - [hash_table.py](py/hash_table.py): Hash table with separate chaining
 - [nth_fibonacci.py](py/nth_fibonacci.py): Find the nth fibonacci number
 - [fibonacci_sequence.py](py/fibonacci_sequence.py): Different approaches to generating the fibonacci sequence
+
+### Binary Trees
+- [binary_search_trees.org](org/binary_search_trees.org): Binary search tree basics
+- [kth_largest.py](py/kth_largest.py): Find kth largest element using binary search tree
 
 ### Linked Lists
 - [detect_linkedlist_cycle.org](org/detect_linkedlist_cycle.org): Detect cycle in linked list

@@ -348,6 +348,7 @@ tree2 = BST2()
 for i in items:
     tree2.insert(i)
 
+
 assert tree2.root.value == 7
 assert tree2.root.right.left.right.value == 8
 
