@@ -282,10 +282,8 @@ breadth_first(tree.root, action)
 
 ** Deleting a node in a BST
 
-*** Approach 1
-
 To delete a node, we need to make sure that the BST property is
-maintained i.e. left_child.value <= parent.value <= right_child.value.
+maintained i.e. ~left_child.value~ <= ~parent.value~ <= ~right_child.value~.
 
 To do this, once we identify the node to delete, we replace either
 with the smallest valued node it its right subtree, or the largest
