@@ -34,19 +34,18 @@ def search(pattern, to_search):
 
     if not pattern_length and search_length:
         return
-    
+
     index = 0
     while index < search_length - pattern_length + 1:
 
         inner_index = 0
-        while pattern[inner_index] == to_search[index + inner_index]:
-
-            if inner_index + 1 == pattern_length:
-                # matching substring found
-                yield (index, pattern_length)
-                index += inner_index
-                break
+        while inner_index < pattern_length and pattern[inner_index] == to_search[index + inner_index]:
             inner_index += 1
+            
+        if inner_index == pattern_length:
+            # matching substring found
+            yield (index, pattern_length)
+            index += (inner_index - 1)
 
         index += 1
                
@@ -59,6 +58,17 @@ print(list(search('a', 'aaaa')))
 #+RESULTS:
 : [(0, 1), (1, 1), (2, 1), (3, 1)]
 
+
+*** Complexity
+
+With m as size of pattern and n as the size of the string, best case
+can have a time complexity of O(n), where mismatches are detected
+early.
+
+Worst case can have a time complexity of O(mn) for example in case where
+there's a high similarity between characters in the pattern and the string,
+causing the pattern to be iterated through for each character in the 
+string.
 
 ** Boyer-Moore-Horspool Search Algorithm
 
@@ -84,20 +94,19 @@ def search(pattern, to_search):
     pattern_length = len(pattern)
     search_length = len(to_search)
 
+    if not pattern_length and search_length:
+        return
+
     search_index = pattern_length - 1
     while search_index < search_length:
 
         pattern_index = 0
-        while pattern[pattern_length - 1 - pattern_index] == to_search[search_index - pattern_index]:
+        while pattern_index != pattern_length and pattern[pattern_length - 1 - pattern_index] == to_search[search_index - pattern_index]:
             pattern_index += 1
-
-            if pattern_index == pattern_length:
-                # we have found a match
-                yield (search_index - (pattern_index - 1), pattern_length)
-                break
 
         if pattern_index == pattern_length:
             # we found a match, so shift by pattern length
+            yield (search_index - (pattern_index - 1), pattern_length)
             shift = pattern_length
         else:
             # shift using bad-match table
@@ -144,3 +153,13 @@ print(list(search('a', 'aaaa')))
 
 #+RESULTS:
 : [(0, 1), (1, 1), (2, 1), (3, 1)]
+
+*** Complexity
+
+Best case can have a time complexity O(n/m), where n is size of string
+and m is the size of the pattern and mismatches are detected early and
+result in shifts of size m.
+
+Worst case can have a time complexity of O(mn) when for example most
+but not all of the pattern matches and similar characters occur
+between the two causing small shifts.
