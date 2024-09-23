@@ -3,10 +3,11 @@
 :header-args: :session
 :END:
 
-We define a function that takes in a pattern to search and the string
-to search and return a list of all found matches. Each match is in the
-form of a tuple of the index in the string at which the pattern was
-found, and the length of the substring matching the pattern.
+We define a function that takes in a pattern to search for and the
+string to search and returns a list of all found matches. Each match
+is in the form of a tuple of the index in the string at which the
+pattern was found, and the length of the substring matching the
+pattern.
 
 
 #+begin_src python :results silent
@@ -17,15 +18,14 @@ pattern = "the"
 # assert list(matches) == [(0, 3), (31, 3)]
 #+end_src
 
-#+RESULTS:
 
 ** Naive string search
 
-With this approach, we iterate each character of the string to search
+Here, we iterate throught each character of the string
 to check whether it matches the the first character of the pattern.
 
 When we find one that matches, we check whether the characters that
-follow it match the pattern.
+follow match the full pattern.
 
 #+begin_src python :results output
 def search(pattern, to_search):
@@ -62,7 +62,7 @@ print(list(search('a', 'aaaa')))
 *** Complexity
 
 With m as size of pattern and n as the size of the string, best case
-can have a time complexity of O(n), where mismatches are detected
+can have a time complexity of O(n+m), because mismatches are detected
 early.
 
 Worst case can have a time complexity of O(mn) for example in case where
@@ -72,13 +72,13 @@ string.
 
 ** Boyer-Moore-Horspool Search Algorithm
 
-With this approach, instead of shifting character by character in
-the string being searched, looking for the pattern, we use a more
+With this approach, instead of iterating character by character in
+the string being searched looking for the pattern, we use a more
 optimized shifting strategy that reduces the number of comparisons
 we need to make.
 
 We start by shifing by the length of the pattern being searched for,
-then working back by checking whether the pattern matches from rigth to
+then iterate back checking whether the pattern matches from right to
 left.
 
 If there is a mismatch, the first character of the mismatch will be
@@ -87,7 +87,7 @@ the pattern being searched for. We create what is called a bad-match
 table that will tell us for any character, how much we'll shift by.
 
 
-#+begin_src python
+#+begin_src python :results silent
 def search(pattern, to_search):
 
     bad_match_table = BadMatchTable(pattern)
@@ -116,8 +116,6 @@ def search(pattern, to_search):
         search_index += shift
 #+end_src
 
-#+RESULTS:
-
 We then define the bad-match table. If the nonmatching character
 exists in pattern, we only need to shift by a specific number of steps
 so that the matching positions in the pattern and the search string
@@ -143,7 +141,7 @@ class BadMatchTable:
 
 #+RESULTS:
 
-We can now test search using this algorithm.
+We can now test search using the new algorithm.
 
 #+begin_src python :results output
 matches = search(pattern, string_to_search)
@@ -156,10 +154,11 @@ print(list(search('a', 'aaaa')))
 
 *** Complexity
 
-Best case can have a time complexity O(n/m), where n is size of string
-and m is the size of the pattern and mismatches are detected early and
-result in shifts of size m.
+Best case will have a time complexity O(n/m), where n is size of
+string and m is the size of the pattern; mismatches are detected early
+and result in shifts of size m, with the pattern and the string not
+having similar characters.
 
-Worst case can have a time complexity of O(mn) when for example most
+Worst case can have a time complexity of O(mn) when, for example, most
 but not all of the pattern matches and similar characters occur
 between the two causing small shifts.
