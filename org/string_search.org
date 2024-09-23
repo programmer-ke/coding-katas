@@ -1,6 +1,6 @@
 * String Search
 :PROPERTIES:
-:header-args: :session
+:header-args: :session :exports both
 :END:
 
 We define a function that takes in a pattern to search for and the
