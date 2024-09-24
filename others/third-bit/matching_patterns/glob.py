@@ -116,9 +116,6 @@ def test_either_followed_by_literal_no_match():
 
 
 def test():
-    test_either_two_literals_first()
-    test_either_two_literals_not_both()
-
     for k, value in globals().items():
         if k.startswith('test_'):
             value()
