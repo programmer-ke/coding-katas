@@ -55,4 +55,5 @@ def test():
         if k.startswith('test_'):
             obj()
 
-test()
+if __name__ == "__main__":
+    test()

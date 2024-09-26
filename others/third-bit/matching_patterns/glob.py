@@ -6,6 +6,12 @@ class Match:
         result = self._match(text, 0)
         return result == len(text)
 
+    def __eq__(self, other):
+        return self.__class__ == other.__class__ and self.rest == other.rest
+
+    def __str__(self):
+        return f"{self.__class__.__name__}:({self.rest})"
+
 
 class Null(Match):
     def __init__(self):
@@ -25,6 +31,13 @@ class Lit(Match):
         if text[start:end] != self.chars:
             return None
         return self.rest._match(text, end)
+
+    def __eq__(self, other):
+        return super().__eq__(other) and self.chars == other.chars
+
+    def __str__(self):
+        return super().__str__() + f":{self.chars}"
+
 
 class Any(Match):
     def __init__(self, rest=None):
@@ -52,6 +65,16 @@ class Either(Match):
                 if end == len(text):
                     return end
         return None
+
+    def __eq__(self, other):
+        return (
+            super().__eq__(other)
+            and self.left == other.left
+            and self.right == other.right
+        )
+
+    def __str__(self):
+        return super().__str__() + f":{self.left}:{self.right}"
 
 
 def test_literal_match_entire_string():
@@ -120,6 +143,7 @@ def test():
         if k.startswith('test_'):
             value()
 
-test()
+if __name__ == "__main__":
+    test()
 
 
