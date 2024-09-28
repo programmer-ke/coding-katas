@@ -56,18 +56,23 @@ trees. For these, we'll use double rotations.
 
 **** Right-left rotations
 
+This is required when a left-heavy tree's left child has a balance
+factor that is greater than 0.
+
 [[file:img/right_left_rotation.png]]
 
-This rebalances a left-heavy subtree with double rotations by first
-left-rotating the left child of its root, then right-rotating the
-root.
+This rotation rebalances the subtree by first left-rotating the left
+child of its root, then right-rotating the root.
 
 
 **** Left-right rotations
 
+This is required when the right child of a right-heavy subtree has a
+balance factor less than 0.
+
 [[file:img/left_right_rotation.png]]
 
-This rebalances a right-heavy subtree buy first right-rotating the
+This rotation rebalances the subtree by first right-rotating the
 right child of its root, then left-rotating the root.
 
 
@@ -93,7 +98,7 @@ class Node:
 We use the ~height~ to keep track of the node's height in the tree and
 determine the balance factor.
 
-We define the tree below:
+We define an AVL tree with insertion:
 
 #+begin_src python :results output
 from dataclasses import dataclass
@@ -107,7 +112,7 @@ class AVLTree:
 
     def _insert_into(self, node, value):
        if node is None:
-           return Node(value=value, height=1)
+           return Node(value=value, height=0)
 
        if value < node.value:
            node.left = self._insert_into(node.left, value)
@@ -126,7 +131,7 @@ class AVLTree:
         node.height = 1 + max(self.height(node.left), self.height(node.right))
 
     def balance(self, node):
-        right_heavy = self.balance_factor(node) > 0
+        right_heavy = self.balance_factor(node) > 1
         if right_heavy:
             # if right child left heavy, left-right rotation, else, left rotation
             if self.balance_factor(node.right) < 0:
@@ -168,7 +173,7 @@ class AVLTree:
 
     def height(self, node: Node) -> int:
         if node is None:
-            return 0
+            return -1
         return node.height
 
     def preorder(self, action):
@@ -191,11 +196,11 @@ print_nodes = lambda x: print((x.value, x.height), end=" ")
 print("\nPreorder:")
 tree.preorder(print_nodes)
 
-unbalanced = Node(value=1, height=3,
-                  left=Node(value=0, height=1),
-                  right=Node(value=4, height=2,
-                            left=Node(value=2, height=1),
-                            right=Node(value=5, height=1)))
+unbalanced = Node(value=1, height=2,
+                  left=Node(value=0, height=0),
+                  right=Node(value=4, height=1,
+                            left=Node(value=2, height=0),
+                            right=Node(value=5, height=0)))
 tree = AVLTree(root=unbalanced)
 tree.insert(3)
 print("\nPreorder:")
@@ -205,6 +210,6 @@ tree.preorder(print_nodes)
 #+RESULTS:
 : 
 : Preorder:
-: (4, 2) (3, 1) (6, 1) 
+: (4, 1) (3, 0) (6, 0) 
 : Preorder:
-: (2, 3) (1, 2) (0, 1) (4, 2) (3, 1) (5, 1)
+: (2, 2) (1, 1) (0, 0) (4, 1) (3, 0) (5, 0)
