@@ -1,0 +1,6 @@
+[
+    "seq",
+    ["set", "alpha", 100],
+    ["set", "beta", 1],
+    ["add", ["get", "alpha"], ["get", "beta"]]
+]

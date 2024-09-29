@@ -1,0 +1,5 @@
+krm@vger-mac:~/projects/codings/others/third-bit/interpretters$ python3.12 expr.py program.tll 
+=> 101
+krm@vger-mac:~/projects/codings/others/third-bit/interpretters$ python3.12 expr.py program.tll 
+=> 101
+krm@vger-mac:~/projects/codings/others/third-bit/interpretters$ 
