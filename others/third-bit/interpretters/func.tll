@@ -1,0 +1,11 @@
+["seq",
+  ["set", "double",
+    ["func", ["num"],
+      ["add", ["get", "num"], ["get", "num"]]
+    ]
+  ],
+  ["set", "a", 1],
+  ["set", "a", ["call", "double", ["get", "a"]]],
+  ["set", "a", ["call", "double", ["get", "a"]]],
+  ["get", "a"]
+]
