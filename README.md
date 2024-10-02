@@ -4,7 +4,6 @@ The goal here is that each file demostrates a single concept in for
 quick reference.
 
 ## Index
-
 - [string_search.org](org/string_search.org): Naive and optimized string searching
 - [search_swahili.ipynb](ipynb/search_swahili.ipynb): Exploring search techniques with Swahili text
 - [model_from_scratch_mnist.ipynb](ipynb/model_from_scratch_mnist.ipynb): A simple ML model (almost) from scratch
@@ -17,12 +16,15 @@ quick reference.
 - [factorials.py](py/factorials.py): Check if a number is a factorial
 - [simple_recursive_descent_parser.py](py/simple_recursive_descent_parser.py): A simple recursive descent parser
 - [bit_manipulation.py](py/bit_manipulation.py): Bit manipulation
-- [heapsort.py](py/heapsort.py): Heapsort
 - [binary_search.py](py/binary_search.py): Binary Search
 - [quicksort.py](py/quicksort.py): Quicksort
 - [hash_table.py](py/hash_table.py): Hash table with separate chaining
 - [nth_fibonacci.py](py/nth_fibonacci.py): Find the nth fibonacci number
 - [fibonacci_sequence.py](py/fibonacci_sequence.py): Different approaches to generating the fibonacci sequence
+
+### Heaps
+- [heaps.py](py/heaps.py): Heap implementation
+- [heapsort.py](py/heapsort.py): Heapsort
 
 ### Binary Trees
 - [binary_search_trees.org](org/binary_search_trees.org): Binary search tree basics
