@@ -27,7 +27,7 @@ class Experiment(BasicRec):
 
     @staticmethod
     def size():
-        return self.__class__.RECORD_LEN
+        return Experiment.RECORD_LEN
 
     @staticmethod
     def pack(record):
