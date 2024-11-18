@@ -1,7 +1,8 @@
 import curses
 import sys
 import util
-from string import ascii_lowercase
+import string
+
 
 ROW, COL = 0, 1
 
@@ -9,7 +10,7 @@ ROW, COL = 0, 1
 def make_lines(num_lines):
     result = []
     for i in range(num_lines):
-        ch = ascii_lowercase[i % len(ascii_lowercase)]
+        ch = string.ascii_lowercase[i % len(string.ascii_lowercase)]
         result.append(ch + "".join(str(j % 10) for j in range(i)))
     return result
 
@@ -17,17 +18,22 @@ def make_lines(num_lines):
 class Window:
     def __init__(self, screen, size):
         self._screen = screen
-        self._nrow = min(size[ROW], curses.LINES) if size else curses.LINES
-        self._ncol = min(size[COL], curses.COLS) if size else curses.COLS
+        if size is None:
+            self._size = (curses.LINES, curses.COLS)
+        else:
+            self._size = size
 
     def size(self):
-        return (self._nrow, self._ncol)
+        return self._size
 
     def draw(self, lines):
         self._screen.erase()
         for (y, line) in enumerate(lines):
-            if 0 <= y < self._nrow:
-                self._screen.addstr(y, 0, line[:self._ncol])
+            if 0 <= y < self._size[ROW]:
+                self._screen.addstr(y, 0, line[:self._size[COL]])
+
+    def __str__(self):
+        return f"Window(S=screen, Z={self._size})"
 
 
 class Cursor:
@@ -92,6 +98,20 @@ class Buffer:
     def ncol(self, row):
         return len(self._lines[row])
 
+    def insert(self, pos, char):
+        assert 0 <= pos[ROW] < self.nrow()
+        assert 0 <= pos[COL] <= self.ncol(pos[ROW])
+        line = self._lines[pos[ROW]]
+        line = line[:pos[COL]] + char + line[pos[COL]:]
+        self._lines[pos[ROW]] = line
+
+    def delete(self, pos):
+        assert 0 <= pos[ROW] < self.nrow()
+        assert 0 <= pos[COL] < self.ncol(pos[ROW])
+        line = self._lines[pos[ROW]]
+        line = line[:pos[COL]] + line[pos[COL] + 1:]
+        self._lines[pos[ROW]] = line
+        
 
 class ViewportBuffer(Buffer):
     def __init__(self, lines):
@@ -100,7 +120,7 @@ class ViewportBuffer(Buffer):
         self._height = None
 
     def lines(self):
-        return self._lines[self._top:self._top + self._height]
+        return self._lines[self._top:self._bottom()]
 
     def set_height(self, height):
         self._height = height
@@ -122,6 +142,8 @@ class ViewportBuffer(Buffer):
 
 
 class MainApp:
+
+    INSERTABLE = set(string.ascii_letters + string.digits)
 
     TRANSLATE = {
         "\x18": "CONTROL_X",
@@ -162,12 +184,33 @@ class MainApp:
             self._interact()
             self._buffer.scroll(*self._cursor.pos())
 
-    def _interact(self):
+    def _get_key(self):
         key = self._screen.getkey()
-        key = self.TRANSLATE.get(key, key)
-        name = f"_do_{key}"
-        if hasattr(self, name):
-            getattr(self, name)()
+        if key in self.INSERTABLE:
+            return "INSERT", key
+        else:
+            return None, key
+
+    def _interact(self):
+        family, key = self._get_key()
+        if family is None:
+            name = f"_do_{key}"
+            if hasattr(self, name):
+                getattr(self, name)()
+        else:
+            name = f"_do_{family}"
+            if hasattr(self, name):
+                getattr(self, name)(key)
+        self._add_log(key)
+
+    def _add_log(self, key):
+        util.LOG.write(f"{key}:{self._cursor.pos()}:\n")
+
+    def _do_DELETE(self):
+        self._buffer.delete(self._cursor.pos())
+
+    def _do_INSERT(self, key):
+        self._buffer.insert(self._cursor.pos(), key)
 
     def _do_CONTROL_X(self):
         self._running = False
@@ -188,6 +231,62 @@ class MainApp:
         self._running = False
 
 
+class HeadlessWindow(Window):
+    def __init__(self, screen, size):
+        assert size is not None and len(size) == 2
+        super().__init__(screen, size)
+
+
+class HeadlessApp(MainApp):
+    def __init__(self, size, lines):
+        super().__init__(size, lines)
+        self._log = []
+
+    def get_log(self):
+        return self._log
+
+    def _add_log(self, key):
+        self._log.append((key, self._cursor.pos(), self._screen.display()))
+
+    def _make_window(self):
+        self._window = HeadlessWindow(self._screen, self._size)
+
+
+class HeadlessScreen:
+    def __init__(self, size, keystrokes):
+        self._size = size
+        self._keys = keystrokes
+        self._i_key = 0
+        self.erase()
+
+    def getkey(self):
+        if self._i_key == len(self._keys):
+            key = "CONTROL_X"
+        else:
+            key = self._keys[self._i_key]
+            self._i_key += 1
+        return key
+
+    def addstr(self, row, col, text):
+        assert 0 <= row < self._size[ROW]
+        assert col == 0
+        assert len(text) <= self._size[COL]
+        self._display[row] = text + self._display[row][len(text):]
+
+    def move(self, row, col):
+        assert 0 <= row < self._size[ROW]
+        assert 0 <= col < self._size[COL]
+
+    def erase(self):
+        self._display = ['_' * self._size[COL] for _ in range(self._size[ROW])]
+
+    def display(self):
+        return self._display
+
+    def __str__(self):
+        return f"Screen(Z={self._size})"
+
+
 def start():
     num_lines, logfile = int(sys.argv[1]), sys.argv[2]
     size = None
@@ -196,6 +295,35 @@ def start():
     lines = make_lines(num_lines)
     util.open_log(logfile)
     return size, lines
+
+
+def make_fixture(keys, size, lines):
+    screen = HeadlessScreen(size, keys)
+    app = HeadlessApp(size, lines)
+    app(screen)
+    return app
+
+
+def test_scroll_down():
+    size = (2, 2)
+    lines = ["abc", "def", "ghi"]
+    keys = ["KEY_DOWN"] * 3
+    screen = HeadlessScreen(size, keys)
+    app = HeadlessApp(size, lines)
+    app(screen)
+    assert app.get_log()[-1] == ("CONTROL_X", (2, 0), ["de", "gh"])
+
+
+def test_delete_middle():
+    app = make_fixture(["KEY_RIGHT", "DELETE"], (1, 3), ["abc"])
+    assert app.get_log()[-1] == ("CONTROL_X", (0, 1), ["ac_"])
+
+
+def test_delete_when_impossible():
+    try:
+        make_fixture(["DELETE"], (1, 1), [""])
+    except AssertionError:
+        pass
 
 
 if __name__ == "__main__":
