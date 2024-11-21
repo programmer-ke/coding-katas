@@ -1,7 +1,9 @@
+import sys
 from architecture import *
 
 
 class VirtualMachine:
+
     def __init__(self):
         self.initialize([])
         self.prompt = ">>"
@@ -55,3 +57,88 @@ class VirtualMachine:
                 print(self.ram[self.reg[arg0]])
             else:
                 assert False, f"Unknown op {op:06x}"
+
+
+class Assembler:
+    def assemble(self, lines):
+        lines = self._get_lines(lines)
+        labels = self._find_labels(lines)
+        instructions = [
+            line for line in lines if not self._is_label(line)
+        ]
+        compiled = [
+            self._compile(inst, labels) for inst in instructions
+        ]
+        program = self._to_text(compiled)
+        return program
+
+    def _find_labels(self, lines):
+        result = {}
+        loc = 0
+        for l in lines:
+            if self._is_label(l):
+                label = l[:-1].strip()
+                assert label not in result, f"Duplicated label: {label}"
+                result[label] = loc
+            else:
+                loc += 1
+        return result
+
+    def _is_label(self, line):
+        return line.endswith(":")
+
+    def _compile(self, instruction, labels):
+        tokens = instruction.split()
+        op, args = tokens[0], tokens[1:]
+        fmt, code = OPS[op]['fmt'], OPS[op]['code']
+
+        if fmt == "--":
+            return self._combine(code)
+        elif fmt == "r-":
+            return self._combine(self._reg(args[0]), code)
+        elif fmt == "rr":
+            return self._combine(self._reg(args[1]), self._reg(args[0]), code)
+        elif fmt == "rv":
+            return self._combine(self._val(args[1], labels), self._reg(args[0]), code)
+
+    def _val(self, token, labels):
+        if not token.startswith("@"):
+            return int(token)
+        label = token[1:]
+        assert label in labels, f"Unknown label: {label}"
+        return labels[label]
+
+    def _reg(self, token):
+        assert token.startswith('R'), f"Incorrect register: {token}"
+        register_number = int(token[1:])
+        assert 0 <= register_number < NUM_REG, f"Missing register: {token}"
+        return register_number
+
+    def _combine(self, *args):
+        assert len(args) > 0
+        result = 0
+        for a in args:
+            result <<= OP_SHIFT
+            result |= a
+        return result
+
+    def _get_lines(self, raw_lines):
+        return [l for l in raw_lines if not l.startswith('#')]
+
+    def _to_text(self, instructions):
+        return [hex(i) for i in instructions]
+
+
+def main():
+    lines = [l.strip() for l in sys.stdin]
+    print(f"Original: {lines}")
+    assembled = Assembler().assemble(lines)
+    print(f"Assembled: {assembled}")
+
+    vm = VirtualMachine()
+    vm.initialize([int(instruction, base=16) for instruction in assembled])
+    vm.run()
+    
+
+if __name__ == '__main__':
+    main()
