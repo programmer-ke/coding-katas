@@ -60,17 +60,44 @@ class VirtualMachine:
 
 
 class Assembler:
+
+    DIVIDER = ".data"
+
     def assemble(self, lines):
         lines = self._get_lines(lines)
+        to_compile, to_allocate = self._split(lines)
+
         labels = self._find_labels(lines)
         instructions = [
-            line for line in lines if not self._is_label(line)
+            line for line in to_compile if not self._is_label(line)
         ]
+
+        base_of_data = len(instructions)
+        self._add_allocations(base_of_data, labels, to_allocate)
+
         compiled = [
             self._compile(inst, labels) for inst in instructions
         ]
         program = self._to_text(compiled)
         return program
+
+    def _add_allocations(self, base_of_data, labels, to_allocate):
+        for allocation in to_allocate:
+            fields = [a.strip() for a in allocation.split(':')]
+            assert len(fields) == 2, "Invalid directive"
+            label, num_words = fields
+            assert label not in labels, f"Duplicate label in allocations: {label}"
+            num_words = int(num_words)
+            assert (base_of_data + num_words) < RAM_LEN, f"Allocation {label} exceeds available memory"
+            labels[label] = base_of_data
+            base_of_data += num_words
+
+    def _split(self, lines):
+        try:
+            split = lines.index(self.DIVIDER)
+            return lines[0:split], lines[split+1:]
+        except ValueError:
+            return lines, []
 
     def _find_labels(self, lines):
         result = {}
@@ -123,7 +150,7 @@ class Assembler:
         return result
 
     def _get_lines(self, raw_lines):
-        return [l for l in raw_lines if not l.startswith('#')]
+        return [l for l in raw_lines if not l.startswith('#') and len(l.strip())]
 
     def _to_text(self, instructions):
         return [hex(i) for i in instructions]
