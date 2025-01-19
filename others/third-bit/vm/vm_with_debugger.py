@@ -2,10 +2,13 @@ import sys
 from architecture import *
 
 
+OPS_LOOKUP = {value["code"]: key for key, value in OPS.items()}
+
 class VirtualMachine:
 
-    def __init__(self, writer=sys.stdout):
+    def __init__(self, writer=sys.stdout, reader=input):
         self.writer = writer
+        self.reader = reader
         self.initialize([])
         self.prompt = ">>"
 
@@ -29,39 +32,28 @@ class VirtualMachine:
         return [op, arg0, arg1]
 
     def run(self):
-        running = True
-        while running:
-            op, arg0, arg1 = self.fetch()
-            if op == OPS['hlt']['code']:
-                running = False
-            elif op == OPS['ldc']['code']:
-                self.reg[arg0] = arg1
-            elif op == OPS['ldr']['code']:
-                self.reg[arg0] = self.ram[self.reg[arg1]]
-            elif op == OPS['cpy']['code']:
-                self.reg[arg0] = self.reg[arg1]
-            elif op == OPS['str']['code']:
-                self.ram[self.reg[arg1]] = self.reg[arg0]
-            elif op == OPS['add']['code']:
-                self.reg[arg0] += self.reg[arg1]
-            elif op == OPS['sub']['code']:
-                self.reg[arg0] -= self.reg[arg1]
-            elif op == OPS['beq']['code']:
-                if self.reg[arg0] == 0:
-                    self.ip = arg1
-            elif op == OPS['bne']['code']:
-                if self.reg[arg0] != 0:
-                    self.ip = arg1
-            elif op == OPS['prr']['code']:
-                self.write(f"{self.reg[arg0]:06x}")
-            elif op == OPS['prm']['code']:
-                self.write(f"{self.ram[self.reg[arg0]]:06x}")
-            else:
-                assert False, f"Unknown op {op:06x}"
+        self.state = VMState.STEPPING
+        while True:
+            if self.state == VMState.STEPPING:
+                self.interact(self.ip)
+            if self.state == VMState.FINISHED:
+                break
+            instruction = self.ram[self.ip]
+            self.ip += 1
+            op, arg0, arg1 = self.decode(instruction)
+            self.execute(op, arg0, arg1)
+
+    def disassemble(self, addr, instruction):
+        op, arg0, arg1 = self.decode(instruction)
+        assert op in OPS_LOOKUP, f"Unknown op code {op} at {addr}"
+        return f"{OPS_LOOKUP[op]} | {arg0} | {arg1}"
 
     def write(self, *args):
         line = "".join(args) + "\n"
         self.writer.write(line)
+
+    def read(self, prompt):
+        return self.reader(prompt).strip()    
 
 
 class Assembler:
@@ -159,6 +151,56 @@ class Assembler:
 
     def _to_text(self, instructions):
         return [hex(i) for i in instructions]
+
+class Writer:
+    def __init__(self):
+        self.seen = []
+
+    def write(self, *args):
+        self.seen.extend(args)
+
+
+class Reader:
+    def __init__(self, *args):
+        self.commands = args
+        self.index = 0
+
+    def __call__(self, prompt):
+        assert self.index < len(self.commands)
+        self.index += 1
+        return self.commands[self.index - 1]
+
+
+def execute(source, reader, writer):
+    program = Assembler().assemble(source.split("\n"), False)
+    vm = VirtualMachine(writer, reader)
+    vm.initialize(program)
+    vm.run()
+
+
+def test_disassemble():
+    source = """
+    hlt
+    """
+    reader = Reader("d", "q")
+    writer = Writer()
+    execute(source, reader, writer)
+    assert writer.seen == ["hlt | 0 | 0\n"]
+
+def test_print_two_values():
+    source = """
+    ldc R0 55
+    prr R0
+    ldc R0 65
+    prr R0
+    hlt
+    """
+    reader = Reader("s", "s", "s", "q")
+    writer = Writer()
+    execute(source, reader, writer)
+    assert writer.seen == [
+        "000037\n"
+    ]
 
 
 def main():

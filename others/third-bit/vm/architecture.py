@@ -1,3 +1,5 @@
+from enum import Enum
+
 NUM_REG = 4  # number of registers
 RAM_LEN = 256  # number of words in RAM
 
@@ -18,3 +20,8 @@ OPS = {
 OP_MASK = 0xFF  # select a single byte
 OP_SHIFT = 8  # shift up by one byte
 OP_WIDTH = 6  # op width in characters when printing
+
+class VMState(Enum):
+    FINISHED = 0
+    STEPPING = 1
+    RUNNING = 2
