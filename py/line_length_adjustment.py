@@ -3,6 +3,8 @@
 Adjusts the line length of input text by wrapping long lines at a specified maximum length.
 """
 
+import sys
+
 def wrap_line(line, max_length):
     words = line.split()
     wrapped_lines = []
@@ -24,12 +26,11 @@ def wrap_line(line, max_length):
 
 def main():
     max_length = 80
-    with open("input.txt", "r") as f_input:
-        for line in f_input:
-            line = line.strip()
-            wrapped_lines = wrap_line(line, max_length)
-            for wrapped_line in wrapped_lines:
-                print(wrapped_line)
+    for line in sys.stdin:
+        line = line.strip()
+        wrapped_lines = wrap_line(line, max_length)
+        for wrapped_line in wrapped_lines:
+            print(wrapped_line)
 
 if __name__ == "__main__":
     main()
