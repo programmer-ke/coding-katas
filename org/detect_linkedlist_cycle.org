@@ -3,7 +3,7 @@
 :header-args: :session :exports both
 :END:
 
-[Also published [[https://programmer.ke/posts/detect_linkedlist_cycle/][here]]]
+[Also published [[https://programmer.ke/detect_linkedlist_cycle.html][here]]]
 
 Given the head of a linked list, return a boolean indicating whether
 it has a cycle or not.
