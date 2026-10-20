@@ -14,10 +14,10 @@ e.g.
 -1
 
 
-Note that a language like this uses a prefix (aka Polish) notation 
+Note that a language like this uses a prefix (aka Polish) notation
 where the operator precedes its operands.
 
-For example while the infix (conventional) notation would be represented as 
+For example while the infix (conventional) notation would be represented as
 
 > 3 + 4
 7
@@ -39,7 +39,7 @@ is equivalent to the following in infix notation
 > (3 + 4) + 5
 12
 
-Any additional operand after the first two implies applying the 
+Any additional operand after the first two implies applying the
 operation on the accumulated result from the previous operands with the
 additional operand as seen above, until all the operands are exhausted.
 
@@ -51,7 +51,7 @@ expr              ::= NUM
 form              ::= ( operator operands )
 
 operands          ::= expr expr optional_operands
-         
+
 optional_operands ::= expr optional_operands | None
 
 operator          ::= +
@@ -71,7 +71,7 @@ This reads as:
   optional operands
 - An operator is one of +, -, /, *
 
-NUM and the operators above are terminal symbols, meaning that they 
+NUM and the operators above are terminal symbols, meaning that they
 cannot be expanded any further. The goal is to expand an expression
 (recursively if necessary) until we're have terminal symbols
 that can be evaluated.
@@ -80,32 +80,36 @@ More on BNF here: https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form
 
 We then proceed with the implementation below.
 """
+
 import re
 import collections
 
 # We define regular expressions to extract the different types of
 # tokens from an input string
 
-NUM         = r'(?P<NUM>\d+)'
-PLUS        = r'(?P<PLUS>\+)'
-MINUS       = r'(?P<MINUS>-)'
-TIMES       = r'(?P<TIMES>\*)'
-DIVIDE      = r'(?P<DIVIDE>/)'
-LEFT_PAREN  = r'(?P<LEFT_PAREN>\()'
-RIGHT_PAREN = r'(?P<RIGHT_PAREN>\))'
-WHITESPACE  = r'(?P<WHITESPACE>\s+)'
-MISMATCH    = r'(?P<MISMATCH>.)'  # a catch all for any patterns we don't expect
+NUM = r"(?P<NUM>\d+)"
+PLUS = r"(?P<PLUS>\+)"
+MINUS = r"(?P<MINUS>-)"
+TIMES = r"(?P<TIMES>\*)"
+DIVIDE = r"(?P<DIVIDE>/)"
+LEFT_PAREN = r"(?P<LEFT_PAREN>\()"
+RIGHT_PAREN = r"(?P<RIGHT_PAREN>\))"
+WHITESPACE = r"(?P<WHITESPACE>\s+)"
+MISMATCH = r"(?P<MISMATCH>.)"  # a catch all for any patterns we don't expect
 
 
 # Create a pattern that will match all of the above
-master_pattern = re.compile("|".join(
-    [NUM, PLUS, MINUS, TIMES, DIVIDE, LEFT_PAREN, RIGHT_PAREN,
-     WHITESPACE, MISMATCH]))
+master_pattern = re.compile(
+    "|".join(
+        [NUM, PLUS, MINUS, TIMES, DIVIDE, LEFT_PAREN, RIGHT_PAREN, WHITESPACE, MISMATCH]
+    )
+)
 
 
 # Create a generator for tokens
 # We use a namedtuple to create a lightweight class for the tokens
 Token = collections.namedtuple("Token", ["type", "value"])
+
 
 def generate_tokens(text):
     """Generates tokens identified by the regular expressions above
@@ -134,7 +138,7 @@ class Evaluator:
     Key helper methods that are used:
 
     _advance - Move forward one token
-    _accept  - If the next token is of the given type, advance and 
+    _accept  - If the next token is of the given type, advance and
                return True
     _expect  - Advance expecting the next token to be of the given type
                If it isn't, raise a syntax error
@@ -149,7 +153,7 @@ class Evaluator:
         # This allows us to look ahead one token
         self.token, self.next_token = None, None
         self._advance()
-        
+
         # root our grammar is expr
         # call that and return result
         result = self.expr()
@@ -157,7 +161,7 @@ class Evaluator:
 
     def expr(self):
         """expr ::= NUM | form
-        
+
         An expression is either number or form"""
 
         if self._accept("NUM"):
@@ -189,38 +193,35 @@ class Evaluator:
         return result
 
     def operator(self):
-        """operator ::= + | - | * | / """
+        """operator ::= + | - | * | /"""
 
         if (
-                self._accept("PLUS") or
-                self._accept("MINUS") or 
-                self._accept("TIMES") or 
-                self._accept("DIVIDE")
+            self._accept("PLUS")
+            or self._accept("MINUS")
+            or self._accept("TIMES")
+            or self._accept("DIVIDE")
         ):
             return self.token.value
-        
+
         raise SyntaxError("Expected PLUS or MINUS or TIMES or DIVIDE")
 
     def operands(self):
         """operands ::= expr expr optional_operands
-        
+
         operands are two expressions followed by an optional operand
         """
 
         # recursively call expression twice
         # Then add optional operands
-        first = self.expr()
-        second = self.expr()
+        yield self.expr()  # first operand
+        yield self.expr()  # second operand
+        yield from self.optional_operands()
 
-        return [first, second] + self.optional_operands()
-        
     def optional_operands(self):
         """optional_operands ::= expr optional_operands | None
-        
+
         An expression followed by an optional operand, or None
         """
-        
-        operands = []
 
         # Check if the next token is the first token of an expression
         # i.e. if token is in FIRST(expr) in parsing terminology
@@ -230,10 +231,8 @@ class Evaluator:
         FIRST_EXPR = ["NUM", "LEFT_PAREN"]  # FIRST(expr)
 
         if self.next_token.type in FIRST_EXPR:
-            operands.append(self.expr())
-            operands += self.optional_operands()
-
-        return operands
+            yield self.expr()
+            yield from self.optional_operands()
 
     def _apply(self, operator, left, right):
         """Applies operator on the left and right operands"""
